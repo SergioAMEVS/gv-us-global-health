@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+echo '🏗️👷 Running lint-staged to check and format your code... 👷🏗️'
+echo 'please be patient, this may take a while...'
+
+npx lint-staged ||
+(
+    echo '🔨❌ Wait a moment, you have a problem in your code. Check linter/formatter issues. 🔨❌
+          Run npm run lint:fix or fix them manually, add changes and try commit again.';
+    false;
+)
+
+echo '🎉 All staged files passed checks: committing this now.... ✨🚀🍻'
