@@ -20,7 +20,7 @@ Make sure you have the following installed:
 Clone the repository:
 
 ```bash
-git clone https://github.com/todo/us-global-health-funding-cuts.git
+git clone https://github.com/Product-Engineering-Team/gv-us-global-health-funding-cuts
 cd us-global-health-funding-cuts
 ```
 
