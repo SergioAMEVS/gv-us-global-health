@@ -24,8 +24,6 @@ git clone https://github.com/Product-Engineering-Team/gv-us-global-health-fundin
 cd us-global-health-funding-cuts
 ```
 
-> Replace the URL with your actual repository URL.
-
 Install the project dependencies:
 
 ```bash
