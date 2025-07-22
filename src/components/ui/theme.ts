@@ -20,6 +20,27 @@ const theme = createTheme({
       main: '#dc004e',
     },
   },
+
+  components: {
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          borderRadius: '0 !important',
+        },
+      },
+    },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        content: {
+          fontSize: '24px',
+          fontWeight: 700,
+        },
+        expandIconWrapper: {
+          marginLeft: '1em',
+        },
+      },
+    },
+  },
 });
 
 export default theme;

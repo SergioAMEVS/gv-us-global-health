@@ -26,6 +26,7 @@
     "@emotion/styled": "^11.14.1",
     "@kontent-ai/delivery-sdk": "^16.2.1",
     "@kontent-ai/rich-text-resolver": "^2.0.3",
+    "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
     "@portabletext/react": "^3.2.1",
     "lru-cache": "^11.1.0",
