@@ -22,6 +22,7 @@ const theme = createTheme({
       focusVisible: '#1976D24D',
       outlinedBorder: '#1976D280',
       bgMain: '#E8F3FF',
+      bgFooter: '#F0F4F8',
     },
     secondary: {
       main: '#dc004e',

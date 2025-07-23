@@ -7,6 +7,7 @@ declare module '@mui/material/styles' {
     focusVisible?: string;
     outlinedBorder?: string;
     bgMain?: string;
+    bgFooter?: string;
   }
   interface SimplePaletteColorOptions {
     selected?: string;
@@ -14,5 +15,6 @@ declare module '@mui/material/styles' {
     focusVisible?: string;
     outlinedBorder?: string;
     bgMain?: string;
+    bgFooter?: string;
   }
 }
