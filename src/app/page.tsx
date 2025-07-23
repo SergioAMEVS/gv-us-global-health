@@ -1,10 +1,9 @@
-import styles from './page.module.css';
-import Link from 'next/link';
+import SectionHeader from '@/components/common/SectionHeader';
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <Link href="/example">Go to example page</Link>
+    <div>
+      <SectionHeader />
     </div>
   );
 }
