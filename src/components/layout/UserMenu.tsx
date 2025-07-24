@@ -2,6 +2,7 @@
 import { Box, Button, Menu } from '@mui/material';
 import user from '../../../public/icons/user.png';
 import logout from '../../../public/icons/logout.png';
+import arrow_down from '../../../public/icons/arrow_down.png';
 import Image from 'next/image';
 import { useState } from 'react';
 import UserMenuItem from './UserMenuItem';
@@ -38,7 +39,7 @@ export default function UserMenu() {
       <Button
         variant="text"
         sx={{ color: '#32383E', textTransform: 'capitalize' }}
-        endIcon={<Image src="/arrow_down.png" alt="Arrow down" width={24} height={24} />}
+        endIcon={<Image src={arrow_down} alt="Arrow down" width={24} height={24} />}
         onClick={handleMenuClick}
         aria-controls={open ? 'user-menu' : undefined}
         aria-haspopup="true"
