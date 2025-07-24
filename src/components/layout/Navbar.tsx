@@ -17,7 +17,7 @@ export default function Navbar() {
     '/': 'Global Health Funding',
   };
 
-  const title = titles[pathname] || 'Global Health Funding';
+  const title = titles[pathname ?? '/'] || 'Global Health Funding';
 
   return (
     <Grid
