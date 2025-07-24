@@ -21,19 +21,26 @@
     ]
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@kontent-ai/delivery-sdk": "^16.2.1",
+    "@kontent-ai/rich-text-resolver": "^2.0.3",
+    "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@portabletext/react": "^3.2.1",
+    "lru-cache": "^11.1.0",
     "next": "14.2.30",
     "react": "^18",
     "react-dom": "^18",
+    "swr": "^2.3.4",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^20",
-    "@types/react": "^18",
+    "@types/react": "^18.3.23",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.30",

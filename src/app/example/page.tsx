@@ -1,10 +1,12 @@
 'use client';
 
-import useCounterStore from '@/lib/store/useStore';
-import { Button, Grid, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
+import AccordionDrawer from '@/components/common/AccordionDrawer';
 
 export default function Example() {
-  const { count, increment, decrement, reset } = useCounterStore();
+  const accordionSummary =
+    'Top 10 Donor Countries to International Health Assistance as a Share of Total Assistance (2023)';
+  const accordionContent = 'Content Here'; // Could be a component
 
   return (
     <Grid
@@ -16,23 +18,10 @@ export default function Example() {
       style={{ minHeight: '100vh' }}
     >
       <Grid>
-        <Typography variant="h6">Zustand example</Typography>
-        <Typography variant="body1">
-          This is a example how we can use Zustand to handle state
-        </Typography>
-
-        <Typography variant="body1">Contador: {count}</Typography>
-        <Button onClick={increment} variant="contained" color="primary">
-          Incrementar
-        </Button>
-        <Button onClick={decrement} variant="contained" color="secondary">
-          Decrementar
-        </Button>
-        <Button onClick={reset} variant="outlined">
-          Resetear
-        </Button>
+        <AccordionDrawer panelId="test" summary={accordionSummary}>
+          {accordionContent}
+        </AccordionDrawer>
       </Grid>
-      <Grid mt={2}>Welcome to GV!</Grid>
     </Grid>
   );
 }
