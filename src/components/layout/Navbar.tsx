@@ -4,12 +4,13 @@ import gv_icon from '../../../public/icons/GV.png';
 import menu from '../../../public/icons/menu.png';
 import { Grid, IconButton, Typography } from '@mui/material';
 import Image from 'next/image';
-import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import UserMenu from './UserMenu';
+import useOpenMenuStore from '@/lib/store/useStore';
+import DrawerMenu from './DrawerMenu';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { open, toggleOpen } = useOpenMenuStore();
   const pathname = usePathname();
 
   const titles: Record<string, string> = {
@@ -17,10 +18,6 @@ export default function Navbar() {
   };
 
   const title = titles[pathname] || 'Global Health Funding';
-
-  const handleMenuClick = () => {
-    setIsOpen(!isOpen);
-  };
 
   return (
     <Grid
@@ -33,7 +30,7 @@ export default function Navbar() {
       component={'nav'}
     >
       <Grid display={'flex'} alignItems={'center'} gap={3}>
-        <IconButton onClick={handleMenuClick} sx={{ visibility: !isOpen ? 'visible' : 'hidden' }}>
+        <IconButton onClick={toggleOpen} sx={{ visibility: !open ? 'visible' : 'hidden' }}>
           <Image src={menu} alt="Burguer menu" width={30} height={20} />
         </IconButton>
         <Image src={gv_icon} alt="Gates ventures icon" height={40} width={131} />
@@ -42,6 +39,7 @@ export default function Navbar() {
         {title}
       </Typography>
       <UserMenu />
+      <DrawerMenu />
     </Grid>
   );
 }
