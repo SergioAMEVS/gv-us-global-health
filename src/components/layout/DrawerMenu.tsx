@@ -18,7 +18,7 @@ export default function DrawerMenu() {
       href: '/us-global-health-support',
       children: [
         { label: 'US Global Health Appropriations', href: '/us-global-health-aprropriations' },
-        { label: 'USAID-Exti Analysis', href: '/usaid-exti' },
+        { label: 'USAID-Exit Analysis', href: '/usaid-exit' },
       ],
     },
     {
