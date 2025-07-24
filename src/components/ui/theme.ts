@@ -11,6 +11,7 @@ const theme = createTheme({
   typography: {
     fontFamily: roboto.style.fontFamily,
   },
+
   palette: {
     primary: {
       main: '#1976D2',
@@ -30,6 +31,26 @@ const theme = createTheme({
     common: {
       white: '#FFFFFF',
       black: '#000000DE',
+    },
+  },
+  components: {
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          borderRadius: '0 !important',
+        },
+      },
+    },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        content: {
+          fontSize: '24px',
+          fontWeight: 700,
+        },
+        expandIconWrapper: {
+          marginLeft: '1em',
+        },
+      },
     },
   },
 });
