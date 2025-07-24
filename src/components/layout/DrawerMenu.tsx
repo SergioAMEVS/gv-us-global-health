@@ -52,7 +52,7 @@ export default function DrawerMenu() {
             borderRight: '8px solid #4393E4',
             py: '30px ',
             px: '60px',
-            width: '30%',
+            width: '26%',
           },
         },
       }}
@@ -114,7 +114,7 @@ export default function DrawerMenu() {
                 <Link
                   key={child.href}
                   href={child.href}
-                  style={{ textDecoration: 'none', width: '70%' }}
+                  style={{ textDecoration: 'none', width: '90%' }}
                 >
                   <Typography
                     fontWeight={400}
