@@ -72,7 +72,7 @@ export default function DrawerMenu() {
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            ml: 4,
+            px: 5,
           }}
           startIcon={<Image src={arrowLeft} alt="Arrow left" width={10} height={10} />}
         >

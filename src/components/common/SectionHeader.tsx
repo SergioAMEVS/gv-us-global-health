@@ -8,7 +8,7 @@ export default function SectionHeader({
   subTitle?: string;
 }) {
   return (
-    <Grid py={4} px={6} display="flex" flexDirection="column" gap={1}>
+    <Grid py={4} display="flex" flexDirection="column" gap={1}>
       <Typography variant="h5" fontWeight={700}>
         {title}
       </Typography>

@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer style={{ textAlign: 'center' }}>
       <Box bgcolor={'primary.bgFooter'} py={2}>
-        <Grid ml={3} display="flex" justifyContent="space-between" alignItems="center">
+        <Grid ml={6} display="flex" justifyContent="space-between" alignItems="center">
           <Grid display="flex" flexDirection="column" gap={2} justifyContent={'start'}>
             <Typography color={'#000000DE'} fontWeight={500} textAlign="left" fontSize={14}>
               Continue Reading
@@ -26,7 +26,7 @@ export default function Footer() {
         alignItems="center"
         py={2}
       >
-        <Grid ml={3}>
+        <Grid ml={6}>
           <Grid display="flex" flexDirection="column" justifyContent={'start'}>
             <Typography color={'#000000DE'} fontWeight={500} textAlign="left" fontSize={14}>
               US Health Funds: Allocation Trends & Recent Cuts
