@@ -52,7 +52,7 @@ export default function DrawerMenu() {
             borderRight: '8px solid #4393E4',
             py: '30px ',
             px: '60px',
-            // width: '50%',
+            width: '30%',
           },
         },
       }}
@@ -62,12 +62,11 @@ export default function DrawerMenu() {
         justifyContent={'space-between'}
         alignItems={'center'}
         alignContent={'center'}
-        // gap={0}
       >
         <Button
           variant="text"
-          color="common.black"
           sx={{
+            color: 'common.black',
             textTransform: 'capitalize',
             fontSize: 16,
             display: 'flex',
@@ -115,7 +114,7 @@ export default function DrawerMenu() {
                 <Link
                   key={child.href}
                   href={child.href}
-                  style={{ textDecoration: 'none', width: '80%' }}
+                  style={{ textDecoration: 'none', width: '70%' }}
                 >
                   <Typography
                     fontWeight={400}
