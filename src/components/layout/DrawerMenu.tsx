@@ -11,14 +11,14 @@ export default function DrawerMenu() {
   const sidebarLinks = [
     {
       label: 'Global Health Funding',
-      href: '/global-health-funding',
+      href: '/',
     },
     {
       label: 'US Global Health Support',
       href: '/us-global-health-support',
       children: [
         { label: 'US Global Health Appropriations', href: '/us-global-health-aprropriations' },
-        { label: 'USAID-Exti Analysis', href: '//usaid-exti' },
+        { label: 'USAID-Exti Analysis', href: '/usaid-exti' },
       ],
     },
     {
