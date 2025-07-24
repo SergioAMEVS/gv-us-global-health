@@ -5,6 +5,12 @@ import arrowLeft from '../../../public/icons/arrow_left.png';
 import Image from 'next/image';
 import Link from 'next/link';
 
+const typoStyles = {
+  cursor: 'pointer',
+  transition: 'color 0.2s',
+  '&:hover': { color: 'primary.main' },
+};
+
 export default function DrawerMenu() {
   const { open, toggleOpen } = useOpenMenuStore();
 
@@ -100,11 +106,7 @@ export default function DrawerMenu() {
                 fontSize={16}
                 letterSpacing={0.5}
                 color="#171A1C"
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'color 0.2s',
-                  '&:hover': { color: 'primary.main' },
-                }}
+                sx={typoStyles}
               >
                 {item.label}
               </Typography>
@@ -121,12 +123,7 @@ export default function DrawerMenu() {
                     fontSize={16}
                     letterSpacing={0.5}
                     color="#171A1C"
-                    sx={{
-                      cursor: 'pointer',
-                      pl: 3,
-                      transition: 'color 0.2s',
-                      '&:hover': { color: 'primary.main' },
-                    }}
+                    sx={[typoStyles, { ml: 3 }]}
                   >
                     {child.label}
                   </Typography>
