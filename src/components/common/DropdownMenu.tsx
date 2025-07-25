@@ -6,6 +6,7 @@ import { useState } from 'react';
 const SelectStyles = {
   backgroundColor: '#F0F4F8',
   maxHeight: '40px',
+  minWidth: '160px',
   borderRadius: '8px',
   '& .MuiOutlinedInput-notchedOutline': {
     border: 'none',
@@ -38,14 +39,14 @@ function ArrowDownIconComponent(props: React.SVGProps<SVGSVGElement>) {
 const years = [2023, 2024, 2025];
 
 export default function DropdownMenu() {
-  const [year, setYear] = useState('');
+  const [year, setYear] = useState('2023');
 
   const handleChange = (event: SelectChangeEvent) => {
     setYear(event.target.value as string);
   };
 
   return (
-    <Box sx={{ maxWidth: 220 }}>
+    <Box sx={{ maxWidth: 420 }}>
       <FormControl fullWidth>
         <Select
           labelId="demo-simple-select-label"
@@ -60,7 +61,7 @@ export default function DropdownMenu() {
               key={y}
               value={y}
               sx={{
-                color: '#000',
+                color: 'common.black',
                 fontWeight: year === String(y) ? 700 : 400,
               }}
             >

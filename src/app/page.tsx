@@ -1,13 +1,15 @@
 import DropdownMenu from '@/components/common/DropdownMenu';
 import SectionHeader from '@/components/common/SectionHeader';
+import { Grid } from '@mui/material';
 
 export default function Home() {
   return (
     <div>
       <SectionHeader />
-      {/* <Grid container spacing={4} sx={{ padding: '20px' }}> */}
-      <DropdownMenu />
-      {/* </Grid> */}
+
+      <Grid width={'100%'} display={'flex'} justifyContent="end">
+        <DropdownMenu />
+      </Grid>
     </div>
   );
 }
