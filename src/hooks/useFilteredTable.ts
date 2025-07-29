@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { TableData, YearSelection } from '@/types/data';
 
 export function useFilteredTable(originalData: TableData[]) {
@@ -42,15 +42,18 @@ export function useFilteredTable(originalData: TableData[]) {
     return new Set(yearSelections.filter((y) => y.isSelected).map((y) => y.year));
   }, [yearSelections]);
 
-  const filterData = (data: TableData[]): TableData[] => {
-    return data.map((entry) => ({
-      sector: entry.sector,
-      years: entry.years.filter((y) => selectedYearSet.has(y.year)),
-      subsectors: filterData(entry.subsectors),
-    }));
-  };
+  const filterData = useCallback(
+    (data: TableData[]): TableData[] => {
+      return data.map((entry) => ({
+        sector: entry.sector,
+        years: entry.years.filter((y) => selectedYearSet.has(y.year)),
+        subsectors: filterData(entry.subsectors),
+      }));
+    },
+    [selectedYearSet],
+  );
 
-  const filteredData = useMemo(() => filterData(originalData), [originalData, selectedYearSet]);
+  const filteredData = useMemo(() => filterData(originalData), [originalData, filterData]);
 
   const toggleYearSelection = (year: string) => {
     setYearSelections((prev) =>
