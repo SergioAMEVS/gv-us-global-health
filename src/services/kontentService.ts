@@ -31,7 +31,7 @@ export async function getSvgText() {
     .type('svg_text')
     // .elementsParameter(['state_name', 'year', 'population', 'html'])
     .toPromise();
-  console.log(response.data.items)
+  console.log(response.data.items);
   return response.data.items.map((item) => {
     return {
       codename: item.system.codename,

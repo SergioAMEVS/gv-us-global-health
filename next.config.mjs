@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/express_app',
+  // basePath: 'express_app',
   output: 'standalone',
 };
 

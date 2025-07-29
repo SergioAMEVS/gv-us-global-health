@@ -1,10 +1,15 @@
-import styles from './page.module.css';
-import Link from 'next/link';
+import DropdownMenu from '@/components/common/DropdownMenu';
+import SectionHeader from '@/components/common/SectionHeader';
+import { Grid } from '@mui/material';
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <Link href="/example">Go to example page</Link>
+    <div>
+      <SectionHeader />
+
+      <Grid width={'100%'} display={'flex'} justifyContent="end">
+        <DropdownMenu />
+      </Grid>
     </div>
   );
 }
