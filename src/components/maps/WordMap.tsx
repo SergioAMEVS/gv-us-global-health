@@ -8,6 +8,7 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { PlayArrow } from '@mui/icons-material';
 import FloatingIconButton from '../ui/FloatingIconButton';
 import type { Topology, GeometryCollection } from 'topojson-specification';
+import MapLeyend from './MapLeyend';
 
 export default function WorldMap() {
   // Estado para la leyenda
@@ -153,8 +154,9 @@ export default function WorldMap() {
       setLegend({ min, max, color0: map_config.color0, color1: map_config.color1 });
 
       const projection = d3
-        .geoMercator()
+        .geoEquirectangular()
         .center([20, 50])
+        .rotate([-10, 0])
         .fitSize([map_config.width, map_config.height], countries);
       const path = d3.geoPath().projection(projection);
 
@@ -373,7 +375,6 @@ export default function WorldMap() {
         alignItems: 'flex-start',
         margin: 0,
         padding: 0,
-        background: 'linear-gradient(180deg, #eaf3fa 0%, #f7faff 100%)',
       }}
     >
       <div
@@ -384,8 +385,7 @@ export default function WorldMap() {
           margin: 0,
           padding: 0,
           display: 'block',
-          boxShadow: '0 2px 16px rgba(67,147,228,0.08)',
-          borderRadius: 16,
+          marginLeft: 100,
         }}
       />
       <div
@@ -405,42 +405,7 @@ export default function WorldMap() {
           minWidth: 160,
         }}
       />
-      {/* Leyenda vertical High-Low */}
-      <div
-        style={{
-          position: 'absolute',
-          left: 16,
-          bottom: 64 + 48 + 24, // 64px (botones) + 48px (botón) + 24px separación
-          zIndex: 30,
-          // width: 19,
-          // height: 236,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 0,
-        }}
-      >
-        <span style={{ marginBottom: 2 }}>
-          {legend.min ? d3.format('$,')(legend.min) + ' M' : '0'}
-        </span>
-        <span style={{ marginTop: 2 }}>High</span>
-
-        <div
-          style={{
-            width: 19,
-            height: 236,
-            // borderRadius: 8,
-            background: `linear-gradient(180deg, ${legend.color1} 0%, ${legend.color0} 100%)`,
-            margin: 0,
-            position: 'relative',
-          }}
-        />
-        <span style={{ marginTop: 2 }}>Low</span>
-        <span style={{ marginTop: 2 }}>
-          {legend.max ? d3.format('$,')(legend.max) + ' M' : '200M'}
-        </span>
-      </div>
+      <MapLeyend legend={legend} />
       <div
         style={{
           position: 'absolute',
