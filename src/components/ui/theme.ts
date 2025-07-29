@@ -1,3 +1,4 @@
+'use client';
 import { createTheme } from '@mui/material/styles';
 import { Roboto } from 'next/font/google';
 
@@ -14,13 +15,25 @@ const theme = createTheme({
 
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#1976D2',
+      dark: '#1565C0',
+      light: '#42A5F5',
+      contrastText: '#FFFFFF',
+      selected: '#1976D21F',
+      focus: '#1976D214',
+      focusVisible: '#1976D24D',
+      outlinedBorder: '#1976D280',
+      bgMain: '#E8F3FF',
+      bgFooter: '#F0F4F8',
     },
     secondary: {
       main: '#dc004e',
     },
+    common: {
+      white: '#FFFFFF',
+      black: '#000000DE',
+    },
   },
-
   components: {
     MuiAccordion: {
       styleOverrides: {
