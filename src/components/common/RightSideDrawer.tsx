@@ -1,7 +1,7 @@
+import React from 'react';
 import { Drawer, IconButton, Typography, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { type RightSideDrawerProps } from '@/types/components';
-import React from 'react';
 
 const RightSideDrawer: React.FC<RightSideDrawerProps> = ({
   open,
