@@ -1,10 +1,10 @@
-export type TableData = {
+export type SectorData = {
   sector: string;
   years: {
     year: string;
     value: number;
   }[];
-  subsectors: TableData[];
+  subsectors: SectorData[];
 };
 
 export type YearSelection = {

@@ -1,5 +1,5 @@
 import { AccordionProps, DrawerProps } from '@mui/material';
-import { type TableData } from './data';
+import { type SectorData } from '@/types/data';
 
 export interface AccordionDrawerProps extends AccordionProps {
   panelId: string;
@@ -21,7 +21,15 @@ export interface CheckboxGroupProps {
 }
 
 export interface CollapsibleRowProps {
-  row: TableData;
+  row: SectorData;
   level?: number;
   firstColWidth?: string;
+}
+
+export interface WorldMapDrawerTableProps {
+  data: SectorData[];
+}
+
+export interface WorldMapDrawerHorizontalBarChartProps {
+  data: SectorData[];
 }

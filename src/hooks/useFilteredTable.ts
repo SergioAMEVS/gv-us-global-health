@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import type { TableData, YearSelection } from '@/types/data';
+import type { SectorData, YearSelection } from '@/types/data';
 
-export function useFilteredTable(originalData: TableData[]) {
-  const extractUniqueYears = (data: TableData[]): string[] => {
+export function useFilteredTable(originalData: SectorData[]) {
+  const extractUniqueYears = (data: SectorData[]): string[] => {
     const yearSet = new Set<string>();
 
-    const traverse = (entries: TableData[]) => {
+    const traverse = (entries: SectorData[]) => {
       for (const entry of entries) {
         entry.years.forEach((y) => yearSet.add(y.year));
         traverse(entry.subsectors);
@@ -43,7 +43,7 @@ export function useFilteredTable(originalData: TableData[]) {
   }, [yearSelections]);
 
   const filterData = useCallback(
-    (data: TableData[]): TableData[] => {
+    (data: SectorData[]): SectorData[] => {
       return data.map((entry) => ({
         sector: entry.sector,
         years: entry.years.filter((y) => selectedYearSet.has(y.year)),

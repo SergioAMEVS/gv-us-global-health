@@ -1,29 +1,229 @@
 import { Divider, Stack, Typography } from '@mui/material';
-import AccordionDrawer from '@/components/common/AccordionDrawer';
 import WorldMapDrawerTable from '@/components/globalHealthFunding/WorldMapDrawerTable';
+import WorldMapDrawerHorizontalBarChart from '@/components/globalHealthFunding/WorldMapDrawerHorizontalBarChart';
 
-interface ComponentData {
-  text: string;
-}
+const DrawerContent = () => {
+  const tableData = [
+    {
+      sector: 'United States',
+      years: [
+        {
+          year: '2019',
+          value: 7682.4,
+        },
+        {
+          year: '2020',
+          value: 9083.6,
+        },
+        {
+          year: '2021',
+          value: 9140.3,
+        },
+        {
+          year: '2022',
+          value: 13150.4,
+        },
+        {
+          year: '2023',
+          value: 8479.3,
+        },
+      ],
+      subsectors: [
+        {
+          sector: 'Basic Health',
+          years: [
+            {
+              year: '2019',
+              value: 2068.1,
+            },
+            {
+              year: '2020',
+              value: 2139.1,
+            },
+            {
+              year: '2021',
+              value: 2445.9,
+            },
+            {
+              year: '2022',
+              value: 4601.2,
+            },
+            {
+              year: '2023',
+              value: 2670.4,
+            },
+          ],
+          subsectors: [
+            {
+              sector: 'Subsector 1',
+              years: [
+                {
+                  year: '2019',
+                  value: 7682.4,
+                },
+                {
+                  year: '2020',
+                  value: 9083.6,
+                },
+                {
+                  year: '2021',
+                  value: 9140.3,
+                },
+                {
+                  year: '2022',
+                  value: 13150.4,
+                },
+                {
+                  year: '2023',
+                  value: 8479.3,
+                },
+              ],
+              subsectors: [],
+            },
+          ],
+        },
+        {
+          sector: 'General Health',
+          years: [
+            {
+              year: '2019',
+              value: 170.8,
+            },
+            {
+              year: '2020',
+              value: 136.0,
+            },
+            {
+              year: '2021',
+              value: 532.5,
+            },
+            {
+              year: '2022',
+              value: 553.2,
+            },
+            {
+              year: '2023',
+              value: 452.3,
+            },
+          ],
+          subsectors: [
+            {
+              sector: 'Subsector 1',
+              years: [
+                {
+                  year: '2019',
+                  value: 7682.4,
+                },
+                {
+                  year: '2020',
+                  value: 9083.6,
+                },
+                {
+                  year: '2021',
+                  value: 9140.3,
+                },
+                {
+                  year: '2022',
+                  value: 13150.4,
+                },
+                {
+                  year: '2023',
+                  value: 8479.3,
+                },
+              ],
+              subsectors: [],
+            },
+          ],
+        },
+        {
+          sector: 'Non Communicable Diseases',
+          years: [
+            {
+              year: '2019',
+              value: 0.0,
+            },
+            {
+              year: '2020',
+              value: 0.0,
+            },
+            {
+              year: '2021',
+              value: 0.0,
+            },
+            {
+              year: '2022',
+              value: 60.6,
+            },
+            {
+              year: '2023',
+              value: 8.7,
+            },
+          ],
+          subsectors: [],
+        },
+        {
+          sector: 'Population policies/Programs',
+          years: [
+            {
+              year: '2019',
+              value: 5443.3,
+            },
+            {
+              year: '2020',
+              value: 6808.4,
+            },
+            {
+              year: '2021',
+              value: 6161.8,
+            },
+            {
+              year: '2022',
+              value: 7995.1,
+            },
+            {
+              year: '2023',
+              value: 5347.7,
+            },
+          ],
+          subsectors: [
+            {
+              sector: 'Subsector 1',
+              years: [
+                {
+                  year: '2019',
+                  value: 7682.4,
+                },
+                {
+                  year: '2020',
+                  value: 9083.6,
+                },
+                {
+                  year: '2021',
+                  value: 9140.3,
+                },
+                {
+                  year: '2022',
+                  value: 13150.4,
+                },
+                {
+                  year: '2023',
+                  value: 8479.3,
+                },
+              ],
+              subsectors: [],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  const barChartData = tableData[0].subsectors;
 
-interface DrawerContentData {
-  firstComponent: ComponentData;
-  secondComponent: ComponentData;
-  thirdComponent: ComponentData;
-}
-
-interface DrawerContentProps {
-  data: DrawerContentData;
-}
-
-const DrawerContent = ({ data }: DrawerContentProps) => {
   return (
     <Stack gap={2}>
-      <AccordionDrawer panelId="drawer-1" summary={data.firstComponent.text} elevation={0}>
-        Content 1
-      </AccordionDrawer>
+      <WorldMapDrawerHorizontalBarChart data={barChartData} />
       <Divider />
-      <WorldMapDrawerTable />
+      <WorldMapDrawerTable data={tableData} />
       <Divider />
       <Typography variant="body1">
         The US administration has proposed major cuts to global health programs, including the

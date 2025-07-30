@@ -46,7 +46,7 @@ function CollapsibleRow({ row, level = 0, firstColWidth }: CollapsibleRowProps) 
         </TableCell>
         {row.years.map(({ year, value }) => (
           <TableCell key={year} align="left">
-            {value}
+            {value.toFixed(1)}
           </TableCell>
         ))}
       </TableRow>
