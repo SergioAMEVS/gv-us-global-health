@@ -6,9 +6,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Set env vars before build
-ENV NEXT_PUBLIC_BASE_PATH=/express_app
-
 COPY . .
 RUN npm run build
 
