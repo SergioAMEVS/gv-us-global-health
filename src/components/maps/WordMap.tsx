@@ -9,8 +9,14 @@ import { PlayArrow } from '@mui/icons-material';
 import FloatingIconButton from '../ui/FloatingIconButton';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import MapLeyend from './MapLeyend';
+import type { MapDataRow } from '@/data/mapData';
 
-export default function WorldMap() {
+type WorldMapProps = {
+  data: MapDataRow[];
+  year: string;
+};
+
+export default function WorldMap({ data, year }: WorldMapProps) {
   // Estado para la leyenda
   const [legend, setLegend] = useState<{
     min: number;
@@ -38,8 +44,8 @@ export default function WorldMap() {
       color1: '#97C3F0',
       color2: '#0B6BCB',
       tooltipColor: '#616161E5',
-      width: 1800,
-      height: 800,
+      width: 1500,
+      height: 650,
       max: 100,
       min: 0,
       format: ',.0f',
@@ -121,35 +127,53 @@ export default function WorldMap() {
         worldDataTyped.objects.countries,
       ) as FeatureCollection<Geometry, GeoJsonProperties>;
 
+      // Fuzzy normalization for country names
+      function normalize(str: string) {
+        return str
+          .toLowerCase()
+          .replace(/republic|state|islands|the|of|,|\.|\(|\)|-/g, '')
+          .replace(/\s+/g, '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, ''); // remove accents
+      }
+
       const filteredFeatures: Feature<Geometry, GeoJsonProperties>[] = countries.features
         .filter((d) => d.properties && d.properties.name !== 'Antarctica')
         .map((d) => {
+          const topoName = normalize(d.properties?.name || '');
+          // Fuzzy match: exact, includes, or included in
+          const found = data.find((row) => {
+            const dataName = normalize(row.country);
+            return (
+              dataName === topoName || dataName.includes(topoName) || topoName.includes(dataName)
+            );
+          });
+          if (!found) {
+            console.log('No match for:', d.properties?.name);
+          }
           d.properties = {
             ...d.properties,
-            population: Math.floor(Math.random() * (200_000_000 - 1_000_000 + 1)) + 1_000_000,
+            population: found ? (found[year as keyof MapDataRow] as number) : 0,
+            hasData: !!found,
           };
           return d;
         });
       countries.features = filteredFeatures;
 
       // Calcular min y max para la leyenda
+      // Only use countries with population > 0 for min/max
       let min = 0,
         max = 0;
-      if (countries.features.length > 0) {
-        min = Math.min(
-          ...countries.features.map((f) =>
-            f.properties && typeof f.properties.population === 'number'
-              ? f.properties.population
-              : 0,
-          ),
-        );
-        max = Math.max(
-          ...countries.features.map((f) =>
-            f.properties && typeof f.properties.population === 'number'
-              ? f.properties.population
-              : 0,
-          ),
-        );
+      const validPopulations = countries.features
+        .map((f) =>
+          f.properties && typeof f.properties.population === 'number' && f.properties.population > 0
+            ? f.properties.population
+            : null,
+        )
+        .filter((v): v is number => v !== null);
+      if (validPopulations.length > 0) {
+        min = Math.min(...validPopulations);
+        max = Math.max(...validPopulations);
       }
       setLegend({ min, max, color0: map_config.color0, color1: map_config.color1 });
 
@@ -160,11 +184,7 @@ export default function WorldMap() {
         .fitSize([map_config.width, map_config.height], countries);
       const path = d3.geoPath().projection(projection);
 
-      if (
-        countries.features.length > 0 &&
-        countries.features[0].properties &&
-        countries.features[0].properties.population
-      )
+      if (countries.features.length > 0) {
         svg
           .selectAll('path')
           .data(countries.features)
@@ -175,23 +195,17 @@ export default function WorldMap() {
             if (
               d.properties &&
               typeof d.properties.population === 'number' &&
-              !isNaN(d.properties.population)
+              !isNaN(d.properties.population) &&
+              d.properties.population > 0
             ) {
-              const min = Math.min(
-                ...countries.features.map((f) =>
-                  f.properties && typeof f.properties.population === 'number'
-                    ? f.properties.population
-                    : 0,
-                ),
-              );
-              const max = Math.max(
-                ...countries.features.map((f) =>
-                  f.properties && typeof f.properties.population === 'number'
-                    ? f.properties.population
-                    : 0,
-                ),
-              );
-              const norm = (d.properties.population - min) / (max - min || 1);
+              if (max === min) {
+                // Solo un país con datos, usa color1
+                return map_config.color1;
+              }
+              const minLog = Math.log(min);
+              const maxLog = Math.log(max);
+              const valueLog = Math.log(d.properties.population);
+              const norm = (valueLog - minLog) / (maxLog - minLog);
               const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
               const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
               const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
@@ -221,8 +235,11 @@ export default function WorldMap() {
 
             let htmlContent = '';
             htmlContent += `<span style="display:block;font-weight:bold;">${d.properties?.name ?? ''}</span>`;
-            if (d.properties?.population) {
+
+            if (d.properties?.hasData) {
               htmlContent += `<span style="display:block;font-weight:bold;">$${valueFormat(d.properties.population)}M</span>`;
+            } else {
+              htmlContent += `<span style="display:block;font-weight:bold; color: #ff5252;">No data available</span>`;
             }
 
             tooltipRef.current.innerHTML = htmlContent;
@@ -259,31 +276,27 @@ export default function WorldMap() {
             if (
               d.properties &&
               typeof d.properties.population === 'number' &&
-              !isNaN(d.properties.population)
+              !isNaN(d.properties.population) &&
+              d.properties.population > 0
             ) {
-              const min = Math.min(
-                ...countries.features.map((f) =>
-                  f.properties && typeof f.properties.population === 'number'
-                    ? f.properties.population
-                    : 0,
-                ),
-              );
-              const max = Math.max(
-                ...countries.features.map((f) =>
-                  f.properties && typeof f.properties.population === 'number'
-                    ? f.properties.population
-                    : 0,
-                ),
-              );
-              const norm = (d.properties.population - min) / (max - min || 1);
-              const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
-              const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
-              const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
-              d3.select(this).attr('fill', `rgb(${r},${g},${b})`);
+              if (max === min) {
+                d3.select(this).attr('fill', map_config.color1);
+              } else {
+                // log-scale
+                const minLog = Math.log(min);
+                const maxLog = Math.log(max);
+                const valueLog = Math.log(d.properties.population);
+                const norm = (valueLog - minLog) / (maxLog - minLog);
+                const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
+                const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
+                const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
+                d3.select(this).attr('fill', `rgb(${r},${g},${b})`);
+              }
             } else {
               d3.select(this).attr('fill', map_config.color0);
             }
           });
+      }
 
       const zoom = d3
         .zoom<SVGSVGElement, unknown>()
@@ -364,7 +377,7 @@ export default function WorldMap() {
       if (refNode) d3.select(refNode).selectAll('*').remove();
       if (tooltipNode) tooltipNode.innerHTML = '';
     };
-  }, []);
+  }, [data, year]);
 
   return (
     <div

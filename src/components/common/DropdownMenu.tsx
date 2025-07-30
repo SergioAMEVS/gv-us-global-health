@@ -1,7 +1,6 @@
 'use client';
 import { Box, FormControl, MenuItem } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { useState } from 'react';
 
 const SelectStyles = {
   backgroundColor: '#F0F4F8',
@@ -36,13 +35,15 @@ function ArrowDownIconComponent(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const years = [2023, 2024, 2025];
+type DropdownMenuProps = {
+  years: string[];
+  year: string;
+  onChange: (year: string) => void;
+};
 
-export default function DropdownMenu() {
-  const [year, setYear] = useState('2023');
-
+export default function DropdownMenu({ years, year, onChange }: DropdownMenuProps) {
   const handleChange = (event: SelectChangeEvent) => {
-    setYear(event.target.value as string);
+    onChange(event.target.value as string);
   };
 
   return (
