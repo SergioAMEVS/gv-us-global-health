@@ -14,17 +14,6 @@ export default function Example() {
   const accordionContent = 'Content Here'; // Could be a component
   const drawerTitle =
     'United States – Global Health Funding by Sectors and Sub-Sectors (USD Million)';
-  const drawerData = {
-    firstComponent: {
-      text: 'Component 01',
-    },
-    secondComponent: {
-      text: 'Component 02',
-    },
-    thirdComponent: {
-      text: 'Component 03',
-    },
-  };
 
   return (
     <Grid
@@ -37,9 +26,7 @@ export default function Example() {
     >
       <Grid>
         {/* Button should be replaced by interaction with chart */}
-        <Button onClick={() => openDrawer(drawerTitle, <DrawerContent data={drawerData} />)}>
-          Open Drawer
-        </Button>
+        <Button onClick={() => openDrawer(drawerTitle, <DrawerContent />)}>Open Drawer</Button>
         <RightSideDrawer open={isOpen} headerText={headerText} onClose={closeDrawer}>
           {children}
         </RightSideDrawer>
