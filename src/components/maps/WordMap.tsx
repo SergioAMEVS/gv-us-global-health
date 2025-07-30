@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FeatureCollection, Feature, GeoJsonProperties, Geometry } from 'geojson';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
@@ -17,8 +17,14 @@ type WorldMapProps = {
   year: string;
 };
 
+declare global {
+  interface Window {
+    zoomIn: () => void;
+    zoomOut: () => void;
+  }
+}
+
 export default function WorldMap({ data, year }: WorldMapProps) {
-  // Estado para la leyenda
   const [legend, setLegend] = useState<{
     min: number;
     max: number;
@@ -27,14 +33,47 @@ export default function WorldMap({ data, year }: WorldMapProps) {
   }>({ min: 0, max: 0, color0: '#CDD7E1', color1: '#97C3F0' });
   const ref = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const zoomLevel = useRef(1);
-  const zoomTransform = useRef(d3.zoomIdentity);
-  const autoplayInterval = useRef<NodeJS.Timeout | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const gRef = useRef<SVGGElement | null>(null);
+
+  const years = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    return Object.keys(data[0]).filter((k) => k !== 'country');
+  }, [data]);
+  const [currentYear, setCurrentYear] = useState(years.length > 0 ? years[0] : year);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const autoplayRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    setCurrentYear(year);
+  }, [year]);
+
+  useEffect(() => {
+    if (isPlaying && years.length > 0) {
+      autoplayRef.current = setInterval(() => {
+        setCurrentYear((prev) => {
+          const idx = years.indexOf(prev);
+          if (idx < years.length - 1) {
+            return years[idx + 1];
+          } else {
+            setIsPlaying(false);
+            return prev;
+          }
+        });
+      }, 1200);
+    } else if (autoplayRef.current) {
+      clearInterval(autoplayRef.current);
+      autoplayRef.current = null;
+    }
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
+  }, [isPlaying, years]);
+
+  // 1. Inicialización: solo una vez
+  useEffect(() => {
     if (!ref.current) return;
-    ref.current.innerHTML = '';
-    if (tooltipRef.current) tooltipRef.current.innerHTML = '';
+    if (svgRef.current) return; // Ya inicializado
 
     const map_config = {
       data0: 'Entity',
@@ -51,11 +90,56 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       min: 0,
       format: ',.0f',
     };
-    const COLOR_COUNTS = 200;
 
-    function Interpolate(start: number, end: number, steps: number, count: number): number {
-      return Math.floor(start + ((end - start) / steps) * count);
-    }
+    const svg = d3
+      .select(ref.current)
+      .append('svg')
+      .attr('width', map_config.width)
+      .attr('height', map_config.height)
+      .attr('id', 'world-map-svg');
+    svgRef.current = svg.node() as SVGSVGElement;
+    gRef.current = svg.append('g').node() as SVGGElement;
+
+    // Inicializar zoom solo una vez
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([1, 8])
+      .on('zoom', (event) => {
+        d3.select(gRef.current).attr('transform', event.transform);
+      });
+    svg.call(zoom);
+
+    //  Zoom controls
+    window.zoomIn = () => {
+      svg.transition().duration(400).call(zoom.scaleBy, 1.2);
+    };
+    window.zoomOut = () => {
+      svg
+        .transition()
+        .duration(400)
+        .call(zoom.scaleBy, 1 / 1.2);
+    };
+  }, []);
+
+  // 2. Actualización de datos y color (fluido)
+  useEffect(() => {
+    if (!svgRef.current || !gRef.current) return;
+
+    const map_config = {
+      data0: 'Entity',
+      data1: 'Population',
+      label0: 'label 0',
+      label1: 'label 1',
+      color0: '#CDD7E1',
+      color1: '#97C3F0',
+      color2: '#0B6BCB',
+      tooltipColor: '#616161E5',
+      width: 1500,
+      height: 650,
+      max: 100,
+      min: 0,
+      format: ',.0f',
+    };
 
     class Color {
       r: number;
@@ -96,32 +180,9 @@ export default function WorldMap({ data, year }: WorldMapProps) {
     const COLOR_END = new Color(rgb.r, rgb.g, rgb.b);
     const startColors = COLOR_START.getColors(),
       endColors = COLOR_END.getColors();
-    const colors = [];
-    for (let i = 0; i < COLOR_COUNTS; i++) {
-      colors.push(
-        new Color(
-          Interpolate(startColors.r, endColors.r, COLOR_COUNTS, i),
-          Interpolate(startColors.g, endColors.g, COLOR_COUNTS, i),
-          Interpolate(startColors.b, endColors.b, COLOR_COUNTS, i),
-        ),
-      );
-    }
-    // color2 para tooltip
-    // const tooltipColor = map_config.tooltipColor;
-
-    const svg = d3
-      .select(ref.current)
-      .append('svg')
-      .attr('width', map_config.width)
-      .attr('height', map_config.height)
-      .attr('id', 'world-map-svg');
-    // Add a group for all paths so pan/zoom only affects <g>
-    const g = svg.append('g');
-    // svgRef.current = svg.node() as SVGSVGElement;
 
     d3.json('/data/world-topo-min.json').then((worldData) => {
       if (!worldData) return;
-      // Tipar correctamente el resultado de topojson.feature
       const worldDataTyped = worldData as Topology<{
         countries: GeometryCollection<GeoJsonProperties>;
       }>;
@@ -130,14 +191,13 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         worldDataTyped.objects.countries,
       ) as FeatureCollection<Geometry, GeoJsonProperties>;
 
-      // Fuzzy normalization for country names
       function normalize(str: string) {
         return str
           .toLowerCase()
           .replace(/republic|state|islands|the|of|,|\.|\(|\)|-/g, '')
           .replace(/\s+/g, '')
           .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, ''); // remove accents
+          .replace(/[\u0300-\u036f]/g, '');
       }
 
       const filteredFeatures: Feature<Geometry, GeoJsonProperties>[] = countries.features
@@ -150,12 +210,9 @@ export default function WorldMap({ data, year }: WorldMapProps) {
               dataName === topoName || dataName.includes(topoName) || topoName.includes(dataName)
             );
           });
-          if (!found) {
-            console.log('No match for:', d.properties?.name);
-          }
           d.properties = {
             ...d.properties,
-            population: found ? (found[year as keyof MapDataRow] as number) : 0,
+            population: found ? (found[currentYear as keyof MapDataRow] as number) : 0,
             hasData: !!found,
           };
           return d;
@@ -163,7 +220,6 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       countries.features = filteredFeatures;
 
       // Calcular min y max para la leyenda
-      // Only use countries with population > 0 for min/max
       let min = 0,
         max = 0;
       const validPopulations = countries.features
@@ -185,23 +241,103 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         .fitSize([map_config.width, map_config.height], countries);
       const path = d3.geoPath().projection(projection);
 
-      if (countries.features.length > 0) {
-        g.selectAll('path')
-          .data(countries.features)
-          .enter()
-          .append('path')
-          .attr('d', (d: Feature<Geometry, GeoJsonProperties>) => path(d) ?? '')
-          .attr('fill', (d: Feature<Geometry, GeoJsonProperties>) => {
-            if (
-              d.properties &&
-              typeof d.properties.population === 'number' &&
-              !isNaN(d.properties.population) &&
-              d.properties.population > 0
-            ) {
-              if (max === min) {
-                // Solo un país con datos, usa color1
-                return map_config.color1;
-              }
+      // JOIN: actualiza los datos de los paths existentes
+      const paths = d3
+        .select(gRef.current)
+        .selectAll<SVGPathElement, Feature<Geometry, GeoJsonProperties>>('path')
+        .data(countries.features, (d) => {
+          const feature = d as Feature<Geometry, GeoJsonProperties> | null;
+          return feature?.properties?.name ?? '';
+        });
+
+      paths
+        .transition()
+        .duration(600)
+        .attr('fill', (d: Feature<Geometry, GeoJsonProperties>) => {
+          if (
+            d.properties &&
+            typeof d.properties.population === 'number' &&
+            !isNaN(d.properties.population) &&
+            d.properties.population > 0
+          ) {
+            if (max === min) {
+              return map_config.color1;
+            }
+            const minLog = Math.log(min);
+            const maxLog = Math.log(max);
+            const valueLog = Math.log(d.properties.population);
+            const norm = (valueLog - minLog) / (maxLog - minLog);
+            const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
+            const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
+            const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
+            return `rgb(${r},${g},${b})`;
+          }
+          return map_config.color0;
+        });
+
+      // UPDATE: eventos de tooltip y mouse SIEMPRE fuera de la transición
+      paths
+        .on('mousemove', function (event: MouseEvent, d: Feature<Geometry, GeoJsonProperties>) {
+          if (!tooltipRef.current) return;
+          Object.assign(tooltipRef.current.style, {
+            display: 'block',
+            left: `${event.pageX - 133}px`,
+            top: `${event.pageY - 330}px`,
+            background: '#616161E5',
+            border: 'none',
+            color: '#fff',
+            padding: '8px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            borderRadius: '8px',
+            fontSize: '14px',
+            boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
+            position: 'absolute',
+          });
+          let htmlContent = '';
+          htmlContent += `<span style=\"display:block;font-weight:bold;\">${d.properties?.name ?? ''}</span>`;
+          if (d.properties?.hasData) {
+            htmlContent += `<span style=\"display:block;font-weight:bold;\">$${valueFormat(d.properties.population)}M</span>`;
+          } else {
+            htmlContent += `<span style=\"display:block;font-weight:bold; color: #ff5252;\">No data available</span>`;
+          }
+          tooltipRef.current.innerHTML = htmlContent;
+          let arrow = tooltipRef.current.querySelector('.tooltip-arrow');
+          if (!arrow) {
+            arrow = document.createElement('div');
+            arrow.className = 'tooltip-arrow';
+            tooltipRef.current.appendChild(arrow);
+          }
+          Object.assign((arrow as HTMLElement).style, {
+            position: 'absolute',
+            bottom: '-10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '0',
+            height: '0',
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: '10px solid #616161E5',
+            zIndex: '10',
+          });
+          d3.select(this).attr('fill', map_config.color2);
+        })
+        .on('mouseout', function () {
+          if (!tooltipRef.current) return;
+          tooltipRef.current.style.display = 'none';
+          tooltipRef.current.style.background = 'rgba(255,255,255,0.97)';
+          tooltipRef.current.style.border = '1px solid #4393E4';
+          tooltipRef.current.style.color = '#171A1C';
+          const d = d3.select(this).datum() as Feature<Geometry, GeoJsonProperties>;
+          if (
+            d.properties &&
+            typeof d.properties.population === 'number' &&
+            !isNaN(d.properties.population) &&
+            d.properties.population > 0
+          ) {
+            if (max === min) {
+              d3.select(this).attr('fill', map_config.color1);
+            } else {
               const minLog = Math.log(min);
               const maxLog = Math.log(max);
               const valueLog = Math.log(d.properties.population);
@@ -209,170 +345,117 @@ export default function WorldMap({ data, year }: WorldMapProps) {
               const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
               const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
               const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
-              return `rgb(${r},${g},${b})`;
+              d3.select(this).attr('fill', `rgb(${r},${g},${b})`);
             }
-            return map_config.color0;
-          })
-          .attr('stroke', '#fff')
-          .on('mousemove', function (event: MouseEvent, d: Feature<Geometry, GeoJsonProperties>) {
-            if (!tooltipRef.current) return;
-
-            Object.assign(tooltipRef.current.style, {
-              display: 'block',
-              left: `${event.pageX - 133}px`,
-              top: `${event.pageY - 330}px`,
-              background: '#616161E5',
-              border: 'none',
-              color: '#fff',
-              padding: '8px',
-              fontWeight: 'bold',
-              textAlign: 'center',
-              borderRadius: '8px',
-              fontSize: '14px',
-              boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
-              position: 'absolute',
-            });
-
-            let htmlContent = '';
-            htmlContent += `<span style="display:block;font-weight:bold;">${d.properties?.name ?? ''}</span>`;
-
-            if (d.properties?.hasData) {
-              htmlContent += `<span style="display:block;font-weight:bold;">$${valueFormat(d.properties.population)}M</span>`;
-            } else {
-              htmlContent += `<span style="display:block;font-weight:bold; color: #ff5252;">No data available</span>`;
-            }
-
-            tooltipRef.current.innerHTML = htmlContent;
-
-            let arrow = tooltipRef.current.querySelector('.tooltip-arrow');
-            if (!arrow) {
-              arrow = document.createElement('div');
-              arrow.className = 'tooltip-arrow';
-              tooltipRef.current.appendChild(arrow);
-            }
-
-            Object.assign((arrow as HTMLElement).style, {
-              position: 'absolute',
-              bottom: '-10px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '0',
-              height: '0',
-              borderLeft: '8px solid transparent',
-              borderRight: '8px solid transparent',
-              borderTop: '10px solid #616161E5',
-              zIndex: '10',
-            });
-
-            d3.select(this).attr('fill', map_config.color2);
-          })
-          .on('mouseout', function () {
-            if (!tooltipRef.current) return;
-            tooltipRef.current.style.display = 'none';
-            tooltipRef.current.style.background = 'rgba(255,255,255,0.97)';
-            tooltipRef.current.style.border = '1px solid #4393E4';
-            tooltipRef.current.style.color = '#171A1C';
-            const d = d3.select(this).datum() as Feature<Geometry, GeoJsonProperties>;
-            if (
-              d.properties &&
-              typeof d.properties.population === 'number' &&
-              !isNaN(d.properties.population) &&
-              d.properties.population > 0
-            ) {
-              if (max === min) {
-                d3.select(this).attr('fill', map_config.color1);
-              } else {
-                // log-scale
-                const minLog = Math.log(min);
-                const maxLog = Math.log(max);
-                const valueLog = Math.log(d.properties.population);
-                const norm = (valueLog - minLog) / (maxLog - minLog);
-                const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
-                const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
-                const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
-                d3.select(this).attr('fill', `rgb(${r},${g},${b})`);
-              }
-            } else {
-              d3.select(this).attr('fill', map_config.color0);
-            }
-          });
-      }
-
-      const zoom = d3
-        .zoom<SVGSVGElement, unknown>()
-        .scaleExtent([1, 8])
-        .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-          g.attr('transform', event.transform.toString());
-          zoomTransform.current = event.transform;
+          } else {
+            d3.select(this).attr('fill', map_config.color0);
+          }
         });
 
-      // Aplica el zoom al SVG para permitir pan y zoom con mouse
-      svg.call(zoom).call(zoom.transform, d3.zoomIdentity.scale(zoomLevel.current));
-
-      const handleZoom = (factor: number) => {
-        // Get SVG node and its dimensions
-        // const svgNode = svg.node() as SVGSVGElement;
-        const width = map_config.width;
-        const height = map_config.height;
-        // Calculate center
-        const center = [width / 2, height / 2];
-        // Use d3.zoom's scaleBy and translateTo for smooth centered zoom
-        svg.transition().duration(400).call(zoom.scaleBy, factor, center);
-      };
-
-      const startAutoplay = () => {
-        let direction = 1;
-        autoplayInterval.current = setInterval(() => {
-          if (zoomLevel.current >= 8) direction = -1;
-          if (zoomLevel.current <= 1) direction = 1;
-          handleZoom(direction > 0 ? 1.2 : 1 / 1.2);
-        }, 1200);
-      };
-      const stopAutoplay = () => {
-        if (autoplayInterval.current) clearInterval(autoplayInterval.current);
-      };
-
-      (
-        window as unknown as {
-          zoomIn: () => void;
-          zoomOut: () => void;
-          startAutoplay: () => void;
-          stopAutoplay: () => void;
-        }
-      ).zoomIn = () => handleZoom(1.2);
-      (
-        window as unknown as {
-          zoomIn: () => void;
-          zoomOut: () => void;
-          startAutoplay: () => void;
-          stopAutoplay: () => void;
-        }
-      ).zoomOut = () => handleZoom(1 / 1.2);
-      (
-        window as unknown as {
-          zoomIn: () => void;
-          zoomOut: () => void;
-          startAutoplay: () => void;
-          stopAutoplay: () => void;
-        }
-      ).startAutoplay = startAutoplay;
-      (
-        window as unknown as {
-          zoomIn: () => void;
-          zoomOut: () => void;
-          startAutoplay: () => void;
-          stopAutoplay: () => void;
-        }
-      ).stopAutoplay = stopAutoplay;
+      // ENTER: agrega paths nuevos y eventos
+      paths
+        .enter()
+        .append('path')
+        .attr('d', (d: Feature<Geometry, GeoJsonProperties>) => path(d) ?? '')
+        .attr('fill', (d: Feature<Geometry, GeoJsonProperties>) => {
+          if (
+            d.properties &&
+            typeof d.properties.population === 'number' &&
+            !isNaN(d.properties.population) &&
+            d.properties.population > 0
+          ) {
+            if (max === min) {
+              return map_config.color1;
+            }
+            const minLog = Math.log(min);
+            const maxLog = Math.log(max);
+            const valueLog = Math.log(d.properties.population);
+            const norm = (valueLog - minLog) / (maxLog - minLog);
+            const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
+            const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
+            const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
+            return `rgb(${r},${g},${b})`;
+          }
+          return map_config.color0;
+        })
+        .attr('stroke', '#fff')
+        .on('mousemove', function (event: MouseEvent, d: Feature<Geometry, GeoJsonProperties>) {
+          if (!tooltipRef.current) return;
+          Object.assign(tooltipRef.current.style, {
+            display: 'block',
+            left: `${event.pageX - 133}px`,
+            top: `${event.pageY - 330}px`,
+            background: '#616161E5',
+            border: 'none',
+            color: '#fff',
+            padding: '8px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            borderRadius: '8px',
+            fontSize: '14px',
+            boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
+            position: 'absolute',
+          });
+          let htmlContent = '';
+          htmlContent += `<span style=\"display:block;font-weight:bold;\">${d.properties?.name ?? ''}</span>`;
+          if (d.properties?.hasData) {
+            htmlContent += `<span style=\"display:block;font-weight:bold;\">$${valueFormat(d.properties.population)}M</span>`;
+          } else {
+            htmlContent += `<span style=\"display:block;font-weight:bold; color: #ff5252;\">No data available</span>`;
+          }
+          tooltipRef.current.innerHTML = htmlContent;
+          let arrow = tooltipRef.current.querySelector('.tooltip-arrow');
+          if (!arrow) {
+            arrow = document.createElement('div');
+            arrow.className = 'tooltip-arrow';
+            tooltipRef.current.appendChild(arrow);
+          }
+          Object.assign((arrow as HTMLElement).style, {
+            position: 'absolute',
+            bottom: '-10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '0',
+            height: '0',
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: '10px solid #616161E5',
+            zIndex: '10',
+          });
+          d3.select(this).attr('fill', map_config.color2);
+        })
+        .on('mouseout', function () {
+          if (!tooltipRef.current) return;
+          tooltipRef.current.style.display = 'none';
+          tooltipRef.current.style.background = 'rgba(255,255,255,0.97)';
+          tooltipRef.current.style.border = '1px solid #4393E4';
+          tooltipRef.current.style.color = '#171A1C';
+          const d = d3.select(this).datum() as Feature<Geometry, GeoJsonProperties>;
+          if (
+            d.properties &&
+            typeof d.properties.population === 'number' &&
+            !isNaN(d.properties.population) &&
+            d.properties.population > 0
+          ) {
+            if (max === min) {
+              d3.select(this).attr('fill', map_config.color1);
+            } else {
+              const minLog = Math.log(min);
+              const maxLog = Math.log(max);
+              const valueLog = Math.log(d.properties.population);
+              const norm = (valueLog - minLog) / (maxLog - minLog);
+              const r = Math.round(startColors.r + (endColors.r - startColors.r) * norm);
+              const g = Math.round(startColors.g + (endColors.g - startColors.g) * norm);
+              const b = Math.round(startColors.b + (endColors.b - startColors.b) * norm);
+              d3.select(this).attr('fill', `rgb(${r},${g},${b})`);
+            }
+          } else {
+            d3.select(this).attr('fill', map_config.color0);
+          }
+        });
+      paths.exit().remove();
     });
-
-    return () => {
-      const refNode = ref.current;
-      const tooltipNode = tooltipRef.current;
-      if (refNode) d3.select(refNode).selectAll('*').remove();
-      if (tooltipNode) tooltipNode.innerHTML = '';
-    };
-  }, [data, year]);
+  }, [data, currentYear]);
 
   return (
     <div
@@ -426,9 +509,9 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         }}
       >
         <FloatingIconButton
-          onClick={() => (window as unknown as { startAutoplay: () => void }).startAutoplay()}
-          title="Autoplay Zoom"
-          icon={<PlayArrow />}
+          onClick={() => setIsPlaying((prev) => !prev)}
+          title={isPlaying ? 'Stop Autoplay' : 'Autoplay'}
+          icon={<PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />}
         />
         <FloatingIconButton
           onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
