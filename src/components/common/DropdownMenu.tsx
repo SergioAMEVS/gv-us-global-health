@@ -56,6 +56,7 @@ export default function DropdownMenu({ years, year, onChange }: DropdownMenuProp
           onChange={handleChange}
           IconComponent={ArrowDownIconComponent}
           sx={SelectStyles}
+          MenuProps={{ disableScrollLock: true }}
         >
           {years.map((y) => (
             <MenuItem

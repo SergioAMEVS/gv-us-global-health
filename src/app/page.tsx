@@ -14,12 +14,13 @@ export default function Home() {
   console.log('years', years);
   console.log('mapData', mapData);
   return (
-    <div>
+    <div style={{ margin: 0, padding: 0 }}>
       <SectionHeader />
 
       <Grid width={'100%'} display={'flex'} justifyContent="end">
         <DropdownMenu years={years} year={year} onChange={setYear} />
       </Grid>
+
       <WorldMap data={mapData} year={year} />
     </div>
   );

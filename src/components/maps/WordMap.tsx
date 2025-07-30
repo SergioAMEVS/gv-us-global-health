@@ -84,7 +84,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       color1: '#97C3F0',
       color2: '#0B6BCB',
       tooltipColor: '#616161E5',
-      width: 1500,
+      width: 1400,
       height: 650,
       max: 100,
       min: 0,

@@ -28,6 +28,9 @@ export default function Navbar() {
       justifyContent="space-between"
       alignItems="center"
       component={'nav'}
+      position="sticky"
+      top={0}
+      zIndex={1100}
     >
       <Grid display={'flex'} alignItems={'center'} gap={3}>
         <IconButton onClick={toggleOpen} sx={{ visibility: !open ? 'visible' : 'hidden' }}>
