@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import localFont from 'next/font/local';
 import './globals.css';
 import MuiProvider from '@/components/ui/MUIProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable}`} style={{ height: '100vh' }}>
         <AppRouterCacheProvider>
           <MuiProvider>
             <Navbar />
