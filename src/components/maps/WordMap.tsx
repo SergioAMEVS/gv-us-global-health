@@ -10,6 +10,7 @@ import FloatingIconButton from '../ui/FloatingIconButton';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import MapLeyend from './MapLeyend';
 import type { MapDataRow } from '@/data/mapData';
+import { geoCylindricalStereographic } from 'd3-geo-projection';
 
 type WorldMapProps = {
   data: MapDataRow[];
@@ -114,6 +115,8 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       .attr('width', map_config.width)
       .attr('height', map_config.height)
       .attr('id', 'world-map-svg');
+    // Add a group for all paths so pan/zoom only affects <g>
+    const g = svg.append('g');
     // svgRef.current = svg.node() as SVGSVGElement;
 
     d3.json('/data/world-topo-min.json').then((worldData) => {
@@ -141,7 +144,6 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         .filter((d) => d.properties && d.properties.name !== 'Antarctica')
         .map((d) => {
           const topoName = normalize(d.properties?.name || '');
-          // Fuzzy match: exact, includes, or included in
           const found = data.find((row) => {
             const dataName = normalize(row.country);
             return (
@@ -177,16 +179,14 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       }
       setLegend({ min, max, color0: map_config.color0, color1: map_config.color1 });
 
-      const projection = d3
-        .geoEquirectangular()
+      const projection = geoCylindricalStereographic()
         .center([20, 50])
         .rotate([-10, 0])
         .fitSize([map_config.width, map_config.height], countries);
       const path = d3.geoPath().projection(projection);
 
       if (countries.features.length > 0) {
-        svg
-          .selectAll('path')
+        g.selectAll('path')
           .data(countries.features)
           .enter()
           .append('path')
@@ -301,28 +301,23 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       const zoom = d3
         .zoom<SVGSVGElement, unknown>()
         .scaleExtent([1, 8])
-        .filter((event: WheelEvent | MouseEvent | TouchEvent) => event.type !== 'wheel')
         .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-          svg.selectAll('g').attr('transform', event.transform.toString());
-          svg.selectAll('path').attr('transform', event.transform.toString());
+          g.attr('transform', event.transform.toString());
           zoomTransform.current = event.transform;
         });
 
-      // Ahora sí puedes llamar a .call usando el tipo correcto:
-      (svg as d3.Selection<SVGSVGElement, unknown, null, undefined>).call(
-        (zoom as unknown as d3.ZoomBehavior<SVGSVGElement, unknown>).transform,
-        d3.zoomIdentity.scale(zoomLevel.current),
-      );
+      // Aplica el zoom al SVG para permitir pan y zoom con mouse
+      svg.call(zoom).call(zoom.transform, d3.zoomIdentity.scale(zoomLevel.current));
 
       const handleZoom = (factor: number) => {
-        zoomLevel.current = Math.max(1, Math.min(8, zoomLevel.current * factor));
-        (svg as unknown as d3.Selection<SVGSVGElement, unknown, null, undefined>)
-          .transition()
-          .duration(400)
-          .call(
-            (zoom as d3.ZoomBehavior<SVGSVGElement, unknown>).transform,
-            d3.zoomIdentity.scale(zoomLevel.current),
-          );
+        // Get SVG node and its dimensions
+        // const svgNode = svg.node() as SVGSVGElement;
+        const width = map_config.width;
+        const height = map_config.height;
+        // Calculate center
+        const center = [width / 2, height / 2];
+        // Use d3.zoom's scaleBy and translateTo for smooth centered zoom
+        svg.transition().duration(400).call(zoom.scaleBy, factor, center);
       };
 
       const startAutoplay = () => {
@@ -405,7 +400,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         ref={tooltipRef}
         style={{
           position: 'absolute',
-          pointerEvents: 'none',
+          pointerEvents: 'none', // tooltip never blocks mouse
           background: 'rgba(255,255,255,0.97)',
           border: '1px solid #4393E4',
           boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
@@ -416,6 +411,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
           display: 'none',
           zIndex: 10,
           minWidth: 160,
+          userSelect: 'none',
         }}
       />
       <MapLeyend legend={legend} />
