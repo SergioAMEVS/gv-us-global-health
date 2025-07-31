@@ -133,14 +133,26 @@ export default function WorldMap({ data }: WorldMapProps) {
       });
     svg.call(zoom);
 
+    // Initial leftward offset (same as zoomOut min)
+    const offsetX = -50;
+    svg.call(zoom.transform, d3.zoomIdentity.translate(offsetX, 0));
+
     window.zoomIn = () => {
       svg.transition().duration(400).call(zoom.scaleBy, 1.2);
     };
     window.zoomOut = () => {
-      svg
-        .transition()
-        .duration(400)
-        .call(zoom.scaleBy, 1 / 1.2);
+      const svgNode = svg.node();
+      if (!svgNode) return;
+      const t = d3.zoomTransform(svgNode);
+      const minScale = 1;
+      if (t.k <= minScale + 0.01) {
+        svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity.translate(offsetX, 0));
+      } else {
+        svg
+          .transition()
+          .duration(400)
+          .call(zoom.scaleBy, 1 / 1.2);
+      }
     };
   }, []);
 
@@ -318,11 +330,12 @@ export default function WorldMap({ data }: WorldMapProps) {
             position: 'absolute',
           });
           let htmlContent = '';
-          htmlContent += `<span style=\"display:block;font-weight:bold;\">${d.properties?.name ?? ''}</span>`;
           if (d.properties?.hasData) {
+            htmlContent += `<span style=\"display:block;font-weight:bold;\">${d.properties?.name ?? ''}</span>`;
             htmlContent += `<span style=\"display:block;font-weight:bold;\">$${valueFormat(d.properties.population)}M</span>`;
           } else {
-            htmlContent += `<span style=\"display:block;font-weight:bold; color: #ff5252;\">No data available</span>`;
+            htmlContent += `<span style=\"display:block;font-weight:bold; color: #bdbdbd;\">${d.properties?.name ?? ''}</span>`;
+            htmlContent += `<span style=\"display:block;font-weight:bold; color: #bdbdbd;\">No data available</span>`;
           }
           tooltipRef.current.innerHTML = htmlContent;
           let arrow = tooltipRef.current.querySelector('.tooltip-arrow');
