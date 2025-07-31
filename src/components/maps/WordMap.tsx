@@ -48,6 +48,7 @@ export default function WorldMap({ data }: WorldMapProps) {
   const [currentYear, setCurrentYear] = useState(years.length > 0 ? years[0] : year);
   const [isPlaying, setIsPlaying] = useState(false);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     if (years.length > 0 && !years.includes(currentYear)) {
@@ -476,6 +477,7 @@ export default function WorldMap({ data }: WorldMapProps) {
           }
         });
       paths.exit().remove();
+      setIsMapReady(true);
     });
   }, [data, currentYear]);
 
@@ -488,6 +490,7 @@ export default function WorldMap({ data }: WorldMapProps) {
         alignItems: 'flex-start',
         margin: 0,
         padding: 0,
+        minHeight: 650,
       }}
     >
       <div
@@ -501,7 +504,99 @@ export default function WorldMap({ data }: WorldMapProps) {
           marginLeft: 100,
         }}
       />
-      <div
+      {/* Loader Overlay */}
+      <Fade in={!isMapReady} timeout={400} unmountOnExit>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: 650,
+            background: 'rgba(224,224,224,0.95)',
+            borderRadius: 16,
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            transition: 'opacity 0.4s',
+          }}
+        >
+          <div style={{ width: '80%', height: 600, borderRadius: 16, background: '#e0e0e0' }} />
+        </div>
+      </Fade>
+      {/* Map UI (hidden while loading) */}
+      {isMapReady && (
+        <>
+          <div
+            ref={tooltipRef}
+            style={{
+              position: 'absolute',
+              pointerEvents: 'none',
+              background: 'rgba(255,255,255,0.97)',
+              border: '1px solid #4393E4',
+              boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
+              borderRadius: 8,
+              padding: '10px 16px',
+              fontSize: 16,
+              color: '#171A1C',
+              display: 'none',
+              zIndex: 10,
+              minWidth: 160,
+              userSelect: 'none',
+            }}
+          />
+          <MapLeyend legend={legend} />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 64,
+              left: 32,
+              zIndex: 20,
+              display: 'flex',
+              gap: 16,
+            }}
+          >
+            <FloatingIconButton
+              onClick={() => setIsPlaying((prev) => !prev)}
+              title={isPlaying ? 'Stop Autoplay' : 'Autoplay'}
+              icon={
+                !isPlaying ? (
+                  <PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+                ) : (
+                  <StopIcon style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+                )
+              }
+            />
+            {isPlaying ? (
+              <Fade in={isPlaying} timeout={400} unmountOnExit>
+                <div>
+                  <YearSlider years={years} currentYear={currentYear} onChange={setCurrentYear} />
+                </div>
+              </Fade>
+            ) : (
+              <>
+                <Fade in={!isPlaying} timeout={400} unmountOnExit>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <FloatingIconButton
+                      onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
+                      title="Zoom In"
+                      icon={<ZoomInIcon />}
+                    />
+                    <FloatingIconButton
+                      onClick={() => (window as unknown as { zoomOut: () => void }).zoomOut()}
+                      title="Zoom Out"
+                      icon={<ZoomOutIcon />}
+                    />
+                  </div>
+                </Fade>
+              </>
+            )}
+          </div>
+        </>
+      )}
+      {/* <div
         ref={tooltipRef}
         style={{
           position: 'absolute',
@@ -565,7 +660,7 @@ export default function WorldMap({ data }: WorldMapProps) {
             </Fade>
           </>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
