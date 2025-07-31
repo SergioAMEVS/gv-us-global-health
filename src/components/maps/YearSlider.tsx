@@ -24,7 +24,6 @@ export default function YearSlider({ years, currentYear, onChange }: YearSliderP
         value={currentIndex}
         onChange={handleSliderChange}
         step={1}
-        valueLabelDisplay="auto"
         sx={{ flex: 1 }}
       />
       <span style={{ minWidth: 40, textAlign: 'center', fontWeight: 'bold' }}>{currentYear}</span>
