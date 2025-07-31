@@ -6,6 +6,7 @@ import * as topojson from 'topojson-client';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { PlayArrow } from '@mui/icons-material';
+import StopIcon from '@mui/icons-material/Stop';
 import FloatingIconButton from '../ui/FloatingIconButton';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import MapLeyend from './MapLeyend';
@@ -100,7 +101,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
     svgRef.current = svg.node() as SVGSVGElement;
     gRef.current = svg.append('g').node() as SVGGElement;
 
-    // Inicializar zoom solo una vez
+    //  Zoom controls
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
@@ -109,7 +110,6 @@ export default function WorldMap({ data, year }: WorldMapProps) {
       });
     svg.call(zoom);
 
-    //  Zoom controls
     window.zoomIn = () => {
       svg.transition().duration(400).call(zoom.scaleBy, 1.2);
     };
@@ -121,7 +121,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
     };
   }, []);
 
-  // 2. Actualización de datos y color (fluido)
+  // UPDATE COLORS AND DATA
   useEffect(() => {
     if (!svgRef.current || !gRef.current) return;
 
@@ -219,7 +219,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         });
       countries.features = filteredFeatures;
 
-      // Calcular min y max para la leyenda
+      // CALCULATE min and max for legend
       let min = 0,
         max = 0;
       const validPopulations = countries.features
@@ -241,7 +241,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         .fitSize([map_config.width, map_config.height], countries);
       const path = d3.geoPath().projection(projection);
 
-      // JOIN: actualiza los datos de los paths existentes
+      // JOIN: UPDATE existing paths with new data
       const paths = d3
         .select(gRef.current)
         .selectAll<SVGPathElement, Feature<Geometry, GeoJsonProperties>>('path')
@@ -275,7 +275,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
           return map_config.color0;
         });
 
-      // UPDATE: eventos de tooltip y mouse SIEMPRE fuera de la transición
+      // UPDATE: TOOLTIP EVENTS
       paths
         .on('mousemove', function (event: MouseEvent, d: Feature<Geometry, GeoJsonProperties>) {
           if (!tooltipRef.current) return;
@@ -352,7 +352,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
           }
         });
 
-      // ENTER: agrega paths nuevos y eventos
+      // ENTER: ADD new paths
       paths
         .enter()
         .append('path')
@@ -483,7 +483,7 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         ref={tooltipRef}
         style={{
           position: 'absolute',
-          pointerEvents: 'none', // tooltip never blocks mouse
+          pointerEvents: 'none',
           background: 'rgba(255,255,255,0.97)',
           border: '1px solid #4393E4',
           boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
@@ -511,7 +511,13 @@ export default function WorldMap({ data, year }: WorldMapProps) {
         <FloatingIconButton
           onClick={() => setIsPlaying((prev) => !prev)}
           title={isPlaying ? 'Stop Autoplay' : 'Autoplay'}
-          icon={<PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />}
+          icon={
+            !isPlaying ? (
+              <PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+            ) : (
+              <StopIcon style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+            )
+          }
         />
         <FloatingIconButton
           onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
