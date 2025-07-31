@@ -6,7 +6,7 @@ import { Grid, IconButton, Typography } from '@mui/material';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import UserMenu from './UserMenu';
-import useOpenMenuStore from '@/lib/store/useStore';
+import { useOpenMenuStore } from '@/lib/store/useStore';
 import DrawerMenu from './DrawerMenu';
 
 export default function Navbar() {

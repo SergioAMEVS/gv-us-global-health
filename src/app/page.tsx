@@ -3,25 +3,25 @@ import DropdownMenu from '@/components/common/DropdownMenu';
 import SectionHeader from '@/components/common/SectionHeader';
 import WorldMap from '@/components/maps/WordMap';
 import { Grid } from '@mui/material';
-import { useState } from 'react';
 import { mapData } from '@/data/mapData';
+import { useYearStore } from '@/lib/store/useStore';
+import { useEffect } from 'react';
 
 export default function Home() {
-  const years = Object.keys(mapData[0]).filter((k) => k !== 'country');
-  const [year, setYear] = useState(years[0]);
+  const { setYears } = useYearStore();
 
-  console.log('Selected Year:', year);
-  console.log('years', years);
-  console.log('mapData', mapData);
+  useEffect(() => {
+    const y = Object.keys(mapData[0]).filter((k) => k !== 'country');
+    setYears(y);
+  }, [setYears]);
+
   return (
     <div style={{ margin: 0, padding: 0 }}>
       <SectionHeader />
-
       <Grid width={'100%'} display={'flex'} justifyContent="end">
-        <DropdownMenu years={years} year={year} onChange={setYear} />
+        <DropdownMenu />
       </Grid>
-
-      <WorldMap data={mapData} year={year} />
+      <WorldMap data={mapData} />
     </div>
   );
 }

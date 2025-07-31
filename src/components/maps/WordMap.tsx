@@ -14,10 +14,10 @@ import type { MapDataRow } from '@/data/mapData';
 import { geoCylindricalStereographic } from 'd3-geo-projection';
 import YearSlider from './YearSlider';
 import { Fade } from '@mui/material';
+import { useYearStore } from '@/lib/store/useStore';
 
 type WorldMapProps = {
   data: MapDataRow[];
-  year: string;
 };
 
 declare global {
@@ -27,7 +27,9 @@ declare global {
   }
 }
 
-export default function WorldMap({ data, year }: WorldMapProps) {
+export default function WorldMap({ data }: WorldMapProps) {
+  const { year, setYear } = useYearStore();
+
   const [legend, setLegend] = useState<{
     min: number;
     max: number;
@@ -48,8 +50,27 @@ export default function WorldMap({ data, year }: WorldMapProps) {
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setCurrentYear(year);
+    if (years.length > 0 && !years.includes(currentYear)) {
+      setCurrentYear(years[0]);
+      setYear(years[0]);
+    }
+
+    if (years.length > 0 && !years.includes(year)) {
+      setYear(years[0]);
+    }
+  }, [years, currentYear, year, setYear]);
+
+  useEffect(() => {
+    if (currentYear !== year) {
+      setCurrentYear(year);
+    }
   }, [year]);
+
+  useEffect(() => {
+    if (currentYear !== year) {
+      setYear(currentYear);
+    }
+  }, [currentYear]);
 
   useEffect(() => {
     if (isPlaying && years.length > 0) {
@@ -73,10 +94,9 @@ export default function WorldMap({ data, year }: WorldMapProps) {
     };
   }, [isPlaying, years]);
 
-  // 1. Inicialización: solo una vez
   useEffect(() => {
     if (!ref.current) return;
-    if (svgRef.current) return; // Ya inicializado
+    if (svgRef.current) return;
 
     const map_config = {
       data0: 'Entity',
