@@ -12,6 +12,8 @@ import type { Topology, GeometryCollection } from 'topojson-specification';
 import MapLeyend from './MapLeyend';
 import type { MapDataRow } from '@/data/mapData';
 import { geoCylindricalStereographic } from 'd3-geo-projection';
+import YearSlider from './YearSlider';
+import { Fade } from '@mui/material';
 
 type WorldMapProps = {
   data: MapDataRow[];
@@ -519,16 +521,30 @@ export default function WorldMap({ data, year }: WorldMapProps) {
             )
           }
         />
-        <FloatingIconButton
-          onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
-          title="Zoom In"
-          icon={<ZoomInIcon />}
-        />
-        <FloatingIconButton
-          onClick={() => (window as unknown as { zoomOut: () => void }).zoomOut()}
-          title="Zoom Out"
-          icon={<ZoomOutIcon />}
-        />
+        {isPlaying ? (
+          <Fade in={isPlaying} timeout={400} unmountOnExit>
+            <div>
+              <YearSlider years={years} currentYear={currentYear} onChange={setCurrentYear} />
+            </div>
+          </Fade>
+        ) : (
+          <>
+            <Fade in={!isPlaying} timeout={400} unmountOnExit>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <FloatingIconButton
+                  onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
+                  title="Zoom In"
+                  icon={<ZoomInIcon />}
+                />
+                <FloatingIconButton
+                  onClick={() => (window as unknown as { zoomOut: () => void }).zoomOut()}
+                  title="Zoom Out"
+                  icon={<ZoomOutIcon />}
+                />
+              </div>
+            </Fade>
+          </>
+        )}
       </div>
     </div>
   );
