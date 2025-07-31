@@ -20,7 +20,7 @@ export default function MapLeyend({
         gap: 0,
       }}
     >
-      <Typography fontWeight={400} color="#636B74">
+      <Typography fontWeight={400} color="#636B74" width={120} textAlign="center">
         {legend.max ? d3.format('$,')(legend.max) + ' M' : '200M'}
       </Typography>
       <Typography fontWeight={600} color="#636B74">
@@ -38,7 +38,7 @@ export default function MapLeyend({
       <Typography fontWeight={600} color="#636B74">
         Low
       </Typography>
-      <Typography fontWeight={400} color="#636B74">
+      <Typography fontWeight={400} color="#636B74" width={120} textAlign="center">
         {legend.min ? d3.format('$,')(legend.min) + ' M' : '0'}
       </Typography>
     </Grid>
