@@ -6,6 +6,7 @@ import { Grid } from '@mui/material';
 import { mapData } from '@/data/mapData';
 import { useYearStore } from '@/lib/store/useStore';
 import { useEffect } from 'react';
+import FooterMap from '@/components/maps/FooterMap';
 
 export default function Home() {
   const { setYears } = useYearStore();
@@ -16,12 +17,13 @@ export default function Home() {
   }, [setYears]);
 
   return (
-    <div style={{ margin: 0, padding: 0 }}>
+    <Grid style={{ margin: 0, padding: 0 }}>
       <SectionHeader />
       <Grid width={'100%'} display={'flex'} justifyContent="end">
         <DropdownMenu />
       </Grid>
       <WorldMap data={mapData} />
-    </div>
+      <FooterMap />
+    </Grid>
   );
 }

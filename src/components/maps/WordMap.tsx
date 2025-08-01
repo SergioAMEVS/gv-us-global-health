@@ -296,8 +296,8 @@ export default function WorldMap({ data }: WorldMapProps) {
           if (!tooltipRef.current) return;
           Object.assign(tooltipRef.current.style, {
             display: 'block',
-            left: `${event.pageX - 133}px`,
-            top: `${event.pageY - 330}px`,
+            left: `${event.clientX - 80}px`,
+            top: `${event.clientY - 90}px`,
             background: '#616161E5',
             border: 'none',
             color: '#fff',
@@ -307,7 +307,8 @@ export default function WorldMap({ data }: WorldMapProps) {
             borderRadius: '8px',
             fontSize: '14px',
             boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
-            position: 'absolute',
+            position: 'fixed',
+            zIndex: 1000,
           });
           let htmlContent = '';
           if (d.properties?.hasData) {
