@@ -1,17 +1,14 @@
 'use client';
 
 import { Button, Grid } from '@mui/material';
-import AccordionDrawer from '@/components/common/AccordionDrawer';
 import DrawerContent from '@/components/globalHealthFunding/WorldMapDrawerContent';
 import RightSideDrawer from '@/components/common/RightSideDrawer';
+import DonorCountriesAccordion from '@/components/globalHealthFunding/DonorCountriesAccordion';
 import { useDrawer } from '@/hooks';
 
 export default function Example() {
   const { isOpen, headerText, children, openDrawer, closeDrawer } = useDrawer();
 
-  const accordionSummary =
-    'Top 10 Donor Countries to International Health Assistance as a Share of Total Assistance (2023)';
-  const accordionContent = 'Content Here'; // Could be a component
   const drawerTitle =
     'United States – Global Health Funding by Sectors and Sub-Sectors (USD Million)';
 
@@ -32,11 +29,7 @@ export default function Example() {
         </RightSideDrawer>
       </Grid>
       <Grid>
-        <AccordionDrawer panelId="test" summary={accordionSummary} noPadding>
-          <AccordionDrawer panelId="test-inner" summary={accordionSummary} elevation={0}>
-            {accordionContent}
-          </AccordionDrawer>
-        </AccordionDrawer>
+        <DonorCountriesAccordion />
       </Grid>
     </Grid>
   );

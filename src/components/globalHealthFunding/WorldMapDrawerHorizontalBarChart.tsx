@@ -38,6 +38,7 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
     },
     yAxis: {
       type: 'category',
+      inverse: true,
       data: yAxisData,
       name: 'Sectors',
       nameLocation: 'middle',
@@ -65,6 +66,7 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
       left: 160, // adds space on the left for labels and axis name
       right: 30,
       top: 30,
+      bottom: 60,
     },
     series: [
       {
@@ -83,7 +85,10 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
       <Box display="flex" justifyContent="end">
         <DropdownMenu value={year} options={yearOptions} onChange={setYear} />
       </Box>
-      <ReactECharts option={option} style={{ height: '280px', width: '100%' }} />
+      <ReactECharts
+        option={option}
+        style={{ height: `${90 + 45 * yAxisData.length}px`, width: '100%' }}
+      />
     </>
   );
 };

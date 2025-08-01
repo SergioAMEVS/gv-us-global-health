@@ -12,3 +12,15 @@ export type YearSelection = {
   isSelected: boolean;
   disabled: boolean;
 };
+
+export type DonorCountryData = {
+  name: string;
+  isoAlpha2: string;
+  value: number;
+};
+
+export type Country = {
+  name: string;
+  isoAlpha2: string;
+  flag: string;
+};

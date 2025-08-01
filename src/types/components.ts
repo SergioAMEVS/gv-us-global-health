@@ -1,5 +1,5 @@
 import { AccordionProps, DrawerProps } from '@mui/material';
-import { type SectorData } from '@/types/data';
+import type { DonorCountryData, SectorData } from '@/types/data';
 
 export interface AccordionDrawerProps extends AccordionProps {
   panelId: string;
@@ -32,4 +32,8 @@ export interface WorldMapDrawerTableProps {
 
 export interface WorldMapDrawerHorizontalBarChartProps {
   data: SectorData[];
+}
+
+export interface DonorCountriesHorizontalBarChartProps {
+  data: DonorCountryData[];
 }
