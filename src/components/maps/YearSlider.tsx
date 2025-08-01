@@ -1,5 +1,6 @@
 import React from 'react';
 import Slider from '@mui/material/Slider';
+import { Typography } from '@mui/material';
 
 type YearSliderProps = {
   years: string[];
@@ -26,7 +27,9 @@ export default function YearSlider({ years, currentYear, onChange }: YearSliderP
         step={1}
         sx={{ flex: 1 }}
       />
-      <span style={{ minWidth: 40, textAlign: 'center', fontWeight: 'bold' }}>{currentYear}</span>
+      <Typography fontWeight={400} color="#636B74" fontSize={14}>
+        {currentYear}
+      </Typography>
     </div>
   );
 }
