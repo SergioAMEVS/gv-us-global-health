@@ -1,7 +1,8 @@
 'use client';
-import { useYearStore } from '@/lib/store/useStore';
+
 import { Box, FormControl, MenuItem } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { useYearStore } from '@/lib/store/useStore';
 
 const SelectStyles = {
   backgroundColor: '#F0F4F8',
@@ -38,6 +39,7 @@ function ArrowDownIconComponent(props: React.SVGProps<SVGSVGElement>) {
 
 export default function DropdownMenu() {
   const { years, year, setYear } = useYearStore();
+
   const handleChange = (event: SelectChangeEvent) => {
     setYear(event.target.value as string);
   };

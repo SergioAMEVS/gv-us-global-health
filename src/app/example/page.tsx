@@ -1,12 +1,16 @@
 'use client';
 
-import { Grid } from '@mui/material';
-import AccordionDrawer from '@/components/common/AccordionDrawer';
+import { Button, Grid } from '@mui/material';
+import DrawerContent from '@/components/globalHealthFunding/WorldMapDrawerContent';
+import RightSideDrawer from '@/components/common/RightSideDrawer';
+import DonorCountriesAccordion from '@/components/globalHealthFunding/DonorCountriesAccordion';
+import { useDrawer } from '@/hooks';
 
 export default function Example() {
-  const accordionSummary =
-    'Top 10 Donor Countries to International Health Assistance as a Share of Total Assistance (2023)';
-  const accordionContent = 'Content Here'; // Could be a component
+  const { isOpen, headerText, children, openDrawer, closeDrawer } = useDrawer();
+
+  const drawerTitle =
+    'United States – Global Health Funding by Sectors and Sub-Sectors (USD Million)';
 
   return (
     <Grid
@@ -18,9 +22,14 @@ export default function Example() {
       style={{ minHeight: '100vh' }}
     >
       <Grid>
-        <AccordionDrawer panelId="test" summary={accordionSummary}>
-          {accordionContent}
-        </AccordionDrawer>
+        {/* Button should be replaced by interaction with chart */}
+        <Button onClick={() => openDrawer(drawerTitle, <DrawerContent />)}>Open Drawer</Button>
+        <RightSideDrawer open={isOpen} headerText={headerText} onClose={closeDrawer}>
+          {children}
+        </RightSideDrawer>
+      </Grid>
+      <Grid>
+        <DonorCountriesAccordion />
       </Grid>
     </Grid>
   );

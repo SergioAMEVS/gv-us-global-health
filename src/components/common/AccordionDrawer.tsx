@@ -1,23 +1,33 @@
-import { type PropsWithChildren } from 'react';
+import React from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
-import { ExpandMore } from '@mui/icons-material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { type AccordionDrawerProps } from '@/types/components';
 
-export default function AccordionDrawer({
+const AccordionDrawer: React.FC<AccordionDrawerProps> = ({
   panelId,
   summary,
+  noPadding = false,
   children,
-}: PropsWithChildren<AccordionDrawerProps>) {
+  ...other
+}) => {
   return (
-    <Accordion>
+    <Accordion {...other}>
       <AccordionSummary
-        expandIcon={<ExpandMore />}
+        expandIcon={<ExpandMoreIcon />}
         id={`panel-header-${panelId}`}
         aria-controls={`panel-content-${panelId}`}
       >
         {summary}
       </AccordionSummary>
-      <AccordionDetails>{children}</AccordionDetails>
+      <AccordionDetails
+        sx={{
+          padding: noPadding ? 0 : undefined,
+        }}
+      >
+        {children}
+      </AccordionDetails>
     </Accordion>
   );
-}
+};
+
+export default AccordionDrawer;

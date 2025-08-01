@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import './globals.css';
 import MuiProvider from '@/components/ui/MUIProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 
 export const metadata: Metadata = {
   title: 'GV-UGGFC',
