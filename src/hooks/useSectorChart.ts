@@ -31,7 +31,7 @@ export function useSectorChart(data: SectorData[]) {
       }
     });
 
-    return { yAxisData: yAxisData.reverse(), seriesData: seriesData.reverse() };
+    return { yAxisData, seriesData };
   }, [data, year]);
 
   return {
