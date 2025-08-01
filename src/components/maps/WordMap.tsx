@@ -514,7 +514,7 @@ export default function WorldMap({ data }: WorldMapProps) {
             style={{
               position: 'absolute',
               bottom: 64,
-              left: 32,
+              left: 66,
               zIndex: 20,
               display: 'flex',
               gap: 16,
