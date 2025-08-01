@@ -123,8 +123,8 @@ export default function WorldMap({ data }: WorldMapProps) {
       label0: 'label 0',
       label1: 'label 1',
       baseColor: '#CDD7E1',
-      color0: '#97C3F0',
-      color1: '#0063c5ff',
+      color0: '#EDF5FD',
+      color1: '#0A2744',
       color2: '#0B6BCB',
       tooltipColor: '#616161E5',
       width: 1400,
@@ -185,8 +185,8 @@ export default function WorldMap({ data }: WorldMapProps) {
       label0: 'label 0',
       label1: 'label 1',
       baseColor: '#CDD7E1',
-      color0: '#97C3F0',
-      color1: '#0063c5',
+      color0: '#EDF5FD',
+      color1: '#185EA5',
       color2: '#0B6BCB',
       tooltipColor: '#616161E5',
       width: 1500,
@@ -196,45 +196,9 @@ export default function WorldMap({ data }: WorldMapProps) {
       format: ',.0f',
     };
 
-    // class Color {
-    //   r: number;
-    //   g: number;
-    //   b: number;
-    //   constructor(r: number, g: number, b: number) {
-    //     this.r = r;
-    //     this.g = g;
-    //     this.b = b;
-    //   }
-    //   getColors() {
-    //     return { r: this.r, g: this.g, b: this.b };
-    //   }
-    // }
-
-    // function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    //   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    //   return result
-    //     ? {
-    //         r: parseInt(result[1], 16),
-    //         g: parseInt(result[2], 16),
-    //         b: parseInt(result[3], 16),
-    //       }
-    //     : null;
-    // }
-
     function valueFormat(d: number): string {
       return d3.format(map_config.format)(d);
     }
-
-    // const COLOR_FIRST = map_config.color0;
-    // COLOR_LAST = map_config.color1;
-    // let rgb = hexToRgb(COLOR_FIRST);
-    // if (!rgb) throw new Error(`Invalid color: ${COLOR_FIRST}`);
-    // const COLOR_START = new Color(rgb.r, rgb.g, rgb.b);
-    // rgb = hexToRgb(COLOR_LAST);
-    // if (!rgb) throw new Error(`Invalid color: ${COLOR_LAST}`);
-    // const COLOR_END = new Color(rgb.r, rgb.g, rgb.b);
-    // const startColors = COLOR_START.getColors(),
-    //   endColors = COLOR_END.getColors();
 
     d3.json('/data/world-topo-min.json').then((worldData) => {
       if (!worldData) return;
@@ -306,9 +270,10 @@ export default function WorldMap({ data }: WorldMapProps) {
         });
 
       const colorScale = d3
-        .scaleLinear<string>()
+        .scaleLog<string>()
         .domain([globalMinMax.min, globalMinMax.max])
-        .range([map_config.color0, map_config.color1]);
+        .range([map_config.color0, map_config.color1])
+        .clamp(true);
 
       paths
         .transition()
