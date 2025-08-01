@@ -52,6 +52,7 @@ export default function UserMenu() {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        disableScrollLock
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',

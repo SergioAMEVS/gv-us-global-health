@@ -1,8 +1,10 @@
+'use client';
 import { Button } from '@mui/material';
 
 export default function BackToTopButton() {
   const handleClick = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    console.log('Back to top clicked');
   };
 
   return (

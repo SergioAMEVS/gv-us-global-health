@@ -1,8 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { type SectorData } from '@/types/data';
+import { useYearStore } from '@/lib/store/useStore';
 
 export function useSectorChart(data: SectorData[]) {
-  // Extract all unique years from the dataset
+  const { year } = useYearStore();
+
+  // Extrae todos los años únicos de la data
   const yearOptions = useMemo(() => {
     const yearSet: Set<string> = new Set();
     data.forEach((sector) => {
@@ -10,13 +13,10 @@ export function useSectorChart(data: SectorData[]) {
         yearSet.add(entry.year);
       });
     });
-    return Array.from(yearSet).sort(); // sorted for dropdown
+    return Array.from(yearSet).sort();
   }, [data]);
 
-  // State to track the selected year
-  const [year, setYear] = useState<string>(yearOptions[yearOptions.length - 1]); // default to latest year
-
-  // Extract chart data for the selected year
+  // Extrae los datos del gráfico para el año global
   const { yAxisData, seriesData } = useMemo(() => {
     const yAxisData: string[] = [];
     const seriesData: number[] = [];
@@ -24,13 +24,11 @@ export function useSectorChart(data: SectorData[]) {
     data.forEach((sectorEntry) => {
       const sectorName = sectorEntry.sector;
       const yearData = sectorEntry.years.find((y) => y.year === year);
-
       if (yearData) {
         yAxisData.push(sectorName);
         seriesData.push(yearData.value);
       }
     });
-
     return { yAxisData, seriesData };
   }, [data, year]);
 
@@ -39,6 +37,5 @@ export function useSectorChart(data: SectorData[]) {
     seriesData,
     year,
     yearOptions,
-    setYear,
   };
 }
