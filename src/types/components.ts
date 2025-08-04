@@ -37,3 +37,9 @@ export interface WorldMapDrawerHorizontalBarChartProps {
 export interface DonorCountriesHorizontalBarChartProps {
   data: DonorCountryData[];
 }
+
+export interface DropdownMenuProps {
+  value?: string;
+  options?: string[];
+  onChange?: (year: string) => void;
+}

@@ -2,7 +2,7 @@
 
 import { Box, FormControl, MenuItem } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { useYearStore } from '@/lib/store/useStore';
+import { type DropdownMenuProps } from '@/types/components';
 
 const SelectStyles = {
   backgroundColor: '#F0F4F8',
@@ -37,11 +37,9 @@ function ArrowDownIconComponent(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-export default function DropdownMenu() {
-  const { years, year, setYear } = useYearStore();
-
+export default function DropdownMenu({ value, options = [], onChange }: DropdownMenuProps) {
   const handleChange = (event: SelectChangeEvent) => {
-    setYear(event.target.value as string);
+    if (onChange) onChange(event.target.value as string);
   };
 
   return (
@@ -50,19 +48,18 @@ export default function DropdownMenu() {
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={year}
+          value={value}
           onChange={handleChange}
           IconComponent={ArrowDownIconComponent}
           sx={SelectStyles}
-          MenuProps={{ disableScrollLock: true }}
         >
-          {years.map((y) => (
+          {options.map((y) => (
             <MenuItem
               key={y}
               value={y}
               sx={{
                 color: 'common.black',
-                fontWeight: year === String(y) ? 700 : 400,
+                fontWeight: value === String(y) ? 700 : 400,
               }}
             >
               {`Year : ${y}`}

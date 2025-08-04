@@ -1,21 +1,7 @@
 import { useMemo } from 'react';
 import { type SectorData } from '@/types/data';
-import { useYearStore } from '@/lib/store/useStore';
 
-export function useSectorChart(data: SectorData[]) {
-  const { year } = useYearStore();
-
-  // Extrae todos los años únicos de la data
-  const yearOptions = useMemo(() => {
-    const yearSet: Set<string> = new Set();
-    data.forEach((sector) => {
-      sector.years.forEach((entry) => {
-        yearSet.add(entry.year);
-      });
-    });
-    return Array.from(yearSet).sort();
-  }, [data]);
-
+export function useSectorChart(data: SectorData[], year: string) {
   // Extrae los datos del gráfico para el año global
   const { yAxisData, seriesData } = useMemo(() => {
     const yAxisData: string[] = [];
@@ -35,7 +21,5 @@ export function useSectorChart(data: SectorData[]) {
   return {
     yAxisData,
     seriesData,
-    year,
-    yearOptions,
   };
 }

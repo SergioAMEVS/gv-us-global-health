@@ -13,8 +13,13 @@ import MapLeyend from './MapLeyend';
 import type { MapDataRow } from '@/data/mapData';
 import { geoCylindricalStereographic } from 'd3-geo-projection';
 import YearSlider from './YearSlider';
-import { Fade } from '@mui/material';
+import { Box, Fade } from '@mui/material';
 import { useYearStore } from '@/lib/store/useStore';
+import DropdownMenu from '../common/DropdownMenu';
+import { useDrawer } from '@/hooks';
+import RightSideDrawer from '../common/RightSideDrawer';
+import DrawerContent from '../globalHealthFunding/WorldMapDrawerContent';
+import FooterMap from './FooterMap';
 
 type WorldMapProps = {
   data: MapDataRow[];
@@ -28,7 +33,8 @@ declare global {
 }
 
 export default function WorldMap({ data }: WorldMapProps) {
-  const { year, setYear } = useYearStore();
+  const { years, year, setYear, setYears } = useYearStore();
+  const { isOpen, headerText, children, openDrawer, closeDrawer } = useDrawer();
 
   const [legend, setLegend] = useState<{
     min: number;
@@ -41,37 +47,16 @@ export default function WorldMap({ data }: WorldMapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
 
-  const years = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    return Object.keys(data[0]).filter((k) => k !== 'country');
-  }, [data]);
-  const [currentYear, setCurrentYear] = useState(years.length > 0 ? years[0] : year);
   const [isPlaying, setIsPlaying] = useState(false);
   const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
+  /* SET YEAR OPTIONS FOR DROP DOWN FROM DATA */
   useEffect(() => {
-    if (years.length > 0 && !years.includes(currentYear)) {
-      setCurrentYear(years[0]);
-      setYear(years[0]);
-    }
-
-    if (years.length > 0 && !years.includes(year)) {
-      setYear(years[0]);
-    }
-  }, [years, currentYear, year, setYear]);
-
-  useEffect(() => {
-    if (currentYear !== year) {
-      setCurrentYear(year);
-    }
-  }, [year]);
-
-  useEffect(() => {
-    if (currentYear !== year) {
-      setYear(currentYear);
-    }
-  }, [currentYear]);
+    const y = Object.keys(data[0]).filter((k) => k !== 'country');
+    setYears(y);
+    setYear(y[0]);
+  }, [setYear, setYears, data]);
 
   const globalMinMax = useMemo(() => {
     let min = Infinity;
@@ -94,15 +79,12 @@ export default function WorldMap({ data }: WorldMapProps) {
   useEffect(() => {
     if (isPlaying && years.length > 0) {
       autoplayRef.current = setInterval(() => {
-        setCurrentYear((prev) => {
-          const idx = years.indexOf(prev);
-          if (idx < years.length - 1) {
-            return years[idx + 1];
-          } else {
-            setIsPlaying(false);
-            return prev;
-          }
-        });
+        const idx = years.indexOf(year);
+        if (idx < years.length - 1) {
+          setYear(years[idx + 1]);
+        } else {
+          setIsPlaying(false);
+        }
       }, 1200);
     } else if (autoplayRef.current) {
       clearInterval(autoplayRef.current);
@@ -111,7 +93,7 @@ export default function WorldMap({ data }: WorldMapProps) {
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [isPlaying, years]);
+  }, [isPlaying, years, year, setYear]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -231,7 +213,7 @@ export default function WorldMap({ data }: WorldMapProps) {
           });
           d.properties = {
             ...d.properties,
-            population: found ? (found[currentYear as keyof MapDataRow] as number) : 0,
+            population: found ? (found[year as keyof MapDataRow] as number) : 0,
             hasData: !!found,
           };
           return d;
@@ -437,127 +419,141 @@ export default function WorldMap({ data }: WorldMapProps) {
           } else {
             d3.select(this).attr('fill', '#DDE7EE'); // gris para sin datos o 0
           }
+        })
+        .on('click', function (event: MouseEvent, d: Feature<Geometry, GeoJsonProperties>) {
+          console.log(event);
+          const drawerTitle = `${d.properties?.name} – Global Health Funding by Sectors and Sub-Sectors (USD Million)`;
+          openDrawer(drawerTitle, <DrawerContent />);
         });
       paths.exit().remove();
       setIsMapReady(true);
     });
-  }, [data, currentYear]);
+  }, [data, year, globalMinMax.max, globalMinMax.min, openDrawer]);
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        margin: 0,
-        padding: 0,
-        minHeight: 650,
-      }}
-    >
+    <>
+      <Box display="flex" justifyContent="end">
+        <DropdownMenu value={year} options={years} onChange={setYear} />
+      </Box>
       <div
-        id="world-map"
-        ref={ref}
-        className="world-map"
         style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
           margin: 0,
           padding: 0,
-          display: 'block',
-          marginLeft: 100,
+          minHeight: 650,
         }}
-      />
-      {/* Loader Overlay */}
-      <Fade in={!isMapReady} timeout={400} unmountOnExit>
+      >
         <div
+          id="world-map"
+          ref={ref}
+          className="world-map"
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: 650,
-            background: 'rgba(224,224,224,0.95)',
-            borderRadius: 16,
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            transition: 'opacity 0.4s',
+            margin: 0,
+            padding: 0,
+            display: 'block',
+            marginLeft: 100,
           }}
-        >
-          <div style={{ width: '80%', height: 600, borderRadius: 16, background: '#e0e0e0' }} />
-        </div>
-      </Fade>
-      {/* Map UI (hidden while loading) */}
-      {isMapReady && (
-        <>
-          <div
-            ref={tooltipRef}
-            style={{
-              position: 'absolute',
-              pointerEvents: 'none',
-              background: 'rgba(255,255,255,0.97)',
-              border: '1px solid #4393E4',
-              boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
-              borderRadius: 8,
-              padding: '10px 16px',
-              fontSize: 16,
-              color: '#171A1C',
-              display: 'none',
-              zIndex: 10,
-              minWidth: 160,
-              userSelect: 'none',
-            }}
-          />
-          <MapLeyend legend={legend} />
+        />
+        {/* Loader Overlay */}
+        <Fade in={!isMapReady} timeout={400} unmountOnExit>
           <div
             style={{
               position: 'absolute',
-              bottom: 64,
-              left: 66,
-              zIndex: 20,
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: 650,
+              background: 'rgba(224,224,224,0.95)',
+              borderRadius: 16,
+              zIndex: 100,
               display: 'flex',
-              gap: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              transition: 'opacity 0.4s',
             }}
           >
-            <FloatingIconButton
-              onClick={() => setIsPlaying((prev) => !prev)}
-              title={isPlaying ? 'Stop Autoplay' : 'Autoplay'}
-              icon={
-                !isPlaying ? (
-                  <PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
-                ) : (
-                  <StopIcon style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
-                )
-              }
+            <div style={{ width: '80%', height: 600, borderRadius: 16, background: '#e0e0e0' }} />
+          </div>
+        </Fade>
+        {/* Map UI (hidden while loading) */}
+        {isMapReady && (
+          <>
+            <div
+              ref={tooltipRef}
+              style={{
+                position: 'absolute',
+                pointerEvents: 'none',
+                background: 'rgba(255,255,255,0.97)',
+                border: '1px solid #4393E4',
+                boxShadow: '0 2px 8px rgba(67,147,228,0.12)',
+                borderRadius: 8,
+                padding: '10px 16px',
+                fontSize: 16,
+                color: '#171A1C',
+                display: 'none',
+                zIndex: 10,
+                minWidth: 160,
+                userSelect: 'none',
+              }}
             />
-            {isPlaying ? (
-              <Fade in={isPlaying} timeout={400} unmountOnExit>
-                <div>
-                  <YearSlider years={years} currentYear={currentYear} onChange={setCurrentYear} />
-                </div>
-              </Fade>
-            ) : (
-              <>
-                <Fade in={!isPlaying} timeout={400} unmountOnExit>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <FloatingIconButton
-                      onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
-                      title="Zoom In"
-                      icon={<ZoomInIcon />}
-                    />
-                    <FloatingIconButton
-                      onClick={() => (window as unknown as { zoomOut: () => void }).zoomOut()}
-                      title="Zoom Out"
-                      icon={<ZoomOutIcon />}
-                    />
+            <MapLeyend legend={legend} />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 64,
+                left: 66,
+                zIndex: 20,
+                display: 'flex',
+                gap: 16,
+              }}
+            >
+              <FloatingIconButton
+                onClick={() => setIsPlaying((prev) => !prev)}
+                title={isPlaying ? 'Stop Autoplay' : 'Autoplay'}
+                icon={
+                  !isPlaying ? (
+                    <PlayArrow style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+                  ) : (
+                    <StopIcon style={{ color: isPlaying ? '#0B6BCB' : undefined }} />
+                  )
+                }
+              />
+              {isPlaying ? (
+                <Fade in={isPlaying} timeout={400} unmountOnExit>
+                  <div>
+                    <YearSlider years={years} currentYear={year} onChange={setYear} />
                   </div>
                 </Fade>
-              </>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+              ) : (
+                <>
+                  <Fade in={!isPlaying} timeout={400} unmountOnExit>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      <FloatingIconButton
+                        onClick={() => (window as unknown as { zoomIn: () => void }).zoomIn()}
+                        title="Zoom In"
+                        icon={<ZoomInIcon />}
+                      />
+                      <FloatingIconButton
+                        onClick={() => (window as unknown as { zoomOut: () => void }).zoomOut()}
+                        title="Zoom Out"
+                        icon={<ZoomOutIcon />}
+                      />
+                    </div>
+                  </Fade>
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      <FooterMap />
+      <RightSideDrawer open={isOpen} headerText={headerText} onClose={closeDrawer}>
+        {children}
+      </RightSideDrawer>
+    </>
   );
 }
