@@ -11,17 +11,27 @@ const RightSideDrawer: React.FC<RightSideDrawerProps> = ({
   ...other
 }) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} {...other}>
-      <Box sx={{ width: 952, p: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">{headerText}</Typography>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
+    <>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={onClose}
+        ModalProps={{
+          closeAfterTransition: true,
+        }}
+        {...other}
+      >
+        <Box sx={{ width: 952, p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">{headerText}</Typography>
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Box mt={2}>{children}</Box>
         </Box>
-        <Box mt={2}>{children}</Box>
-      </Box>
-    </Drawer>
+      </Drawer>
+    </>
   );
 };
 

@@ -1,8 +1,8 @@
 'use client';
 
-import { Dispatch, SetStateAction } from 'react';
 import { Box, FormControl, MenuItem } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { type DropdownMenuProps } from '@/types/components';
 
 const SelectStyles = {
   backgroundColor: '#F0F4F8',
@@ -37,17 +37,7 @@ function ArrowDownIconComponent(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-interface DropdownMenuProps {
-  value?: string;
-  options?: string[];
-  onChange?: Dispatch<SetStateAction<string>>;
-}
-
-export default function DropdownMenu({
-  value = '2023',
-  options = ['2023', '2024', '2025'],
-  onChange,
-}: DropdownMenuProps) {
+export default function DropdownMenu({ value, options = [], onChange }: DropdownMenuProps) {
   const handleChange = (event: SelectChangeEvent) => {
     if (onChange) onChange(event.target.value as string);
   };

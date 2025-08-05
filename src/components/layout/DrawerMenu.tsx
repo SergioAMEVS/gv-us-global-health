@@ -1,9 +1,9 @@
-import useOpenMenuStore from '@/lib/store/useStore';
 import { Box, Button, Drawer, Grid, IconButton, Typography } from '@mui/material';
 import close from '../../../public/icons/close.png';
 import arrowLeft from '../../../public/icons/arrow_left.png';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useOpenMenuStore } from '@/lib/store/useStore';
 
 const typoStyles = {
   cursor: 'pointer',

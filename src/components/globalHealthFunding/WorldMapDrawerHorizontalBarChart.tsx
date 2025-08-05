@@ -1,12 +1,14 @@
 import { Box } from '@mui/material';
 import ReactECharts from 'echarts-for-react';
-import DropdownMenu from '@/components/common/DropdownMenu';
 import { useSectorChart } from '@/hooks';
 import { breakLine } from '@/utils/text';
+import { useYearStore } from '@/lib/store/useStore';
+import DropdownMenu from '@/components/common/DropdownMenu';
 import { type WorldMapDrawerHorizontalBarChartProps } from '@/types/components';
 
 const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarChartProps) => {
-  const { yAxisData, seriesData, year, yearOptions, setYear } = useSectorChart(data);
+  const { years, year, setYear } = useYearStore();
+  const { yAxisData, seriesData } = useSectorChart(data, year);
 
   const option = {
     tooltip: {
@@ -38,6 +40,7 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
     },
     yAxis: {
       type: 'category',
+      inverse: true,
       data: yAxisData,
       name: 'Sectors',
       nameLocation: 'middle',
@@ -65,6 +68,7 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
       left: 160, // adds space on the left for labels and axis name
       right: 30,
       top: 30,
+      bottom: 60,
     },
     series: [
       {
@@ -81,9 +85,12 @@ const WorldMapDrawerHorizontalBarChart = ({ data }: WorldMapDrawerHorizontalBarC
   return (
     <>
       <Box display="flex" justifyContent="end">
-        <DropdownMenu value={year} options={yearOptions} onChange={setYear} />
+        <DropdownMenu value={year} options={years} onChange={setYear} />
       </Box>
-      <ReactECharts option={option} style={{ height: '280px', width: '100%' }} />
+      <ReactECharts
+        option={option}
+        style={{ height: `${90 + 45 * yAxisData.length}px`, width: '100%' }}
+      />
     </>
   );
 };

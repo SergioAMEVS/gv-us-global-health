@@ -1,15 +1,17 @@
-import DropdownMenu from '@/components/common/DropdownMenu';
-import SectionHeader from '@/components/common/SectionHeader';
+'use client';
+
 import { Grid } from '@mui/material';
+import SectionHeader from '@/components/common/SectionHeader';
+import WorldMap from '@/components/maps/WordMap';
+import DonorCountriesAccordion from '@/components/globalHealthFunding/DonorCountriesAccordion';
+import { mapData } from '@/data/mapData';
 
 export default function Home() {
   return (
-    <div>
+    <Grid container spacing={2} direction="column" pb={3} style={{ minHeight: '100vh' }}>
       <SectionHeader />
-
-      <Grid width={'100%'} display={'flex'} justifyContent="end">
-        <DropdownMenu />
-      </Grid>
-    </div>
+      <WorldMap data={mapData} />
+      <DonorCountriesAccordion />
+    </Grid>
   );
 }
